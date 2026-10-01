@@ -1,0 +1,566 @@
+---
+// Copy: condensed from Lina’s own drafts and prayer letter; needs her final
+// approval before deployment (site.copyReviewedByLina).
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site.ts';
+import hero from '../assets/hero/hero-sky.jpg';
+
+// The wide photo is cropped by object-fit: cover, so on a tall phone screen
+// it renders at ~3.6× the viewport width.
+const heroSizes = '(orientation: portrait) 360vw, max(100vw, 180vh)';
+
+// Index / folio sheets. Without JavaScript they render as a plain section
+// under the poster, and the index links jump to them.
+const sheets = [
+  {
+    id: 'story',
+    num: '01',
+    title: 'Story',
+    paragraphs: [
+      'I grew up in Omsk in a Christian family; my parents were missionaries from Latvia. Faith became my own as a teenager, and I was baptised at 17.',
+      'Since then I’ve helped with youth groups, church camps and worship teams. In 2023 I moved to Latvia to study Business and Management.',
+    ],
+  },
+  {
+    id: 'year',
+    num: '02',
+    title: 'The year',
+    paragraphs: [
+      'As my studies came to an end, I could have gone on to a Master’s or stayed in my job. I didn’t have peace about either.',
+      'Then I heard about the Ministry Training Scheme at All Souls Church in London. I applied and was accepted for 2026–⁠27. The scheme brings Bible teaching, mentoring and practical service together in a local church.',
+    ],
+  },
+  {
+    id: 'prayer',
+    num: '03',
+    title: 'Prayer',
+    paragraphs: ['If you pray, please remember:'],
+    list: ['Wisdom for the decisions ahead.', 'The people I’ll meet.', 'Faithfulness in everyday work.'],
+  },
+];
+---
+
+<BaseLayout
+  title="Lina Makarenko — linway"
+  description="Lina Makarenko was accepted for the 2026–⁠27 Ministry Training Scheme at All Souls, London. Read her story, pray with her, or give through Stewardship."
+>
+  <main>
+    <section class="poster" aria-labelledby="title">
+      <Picture
+        src={hero}
+        formats={['avif', 'webp']}
+        widths={[800, 1200, 1600, 2400]}
+        sizes={heroSizes}
+        alt="A raised hand holding a Bible against a blue sky."
+        loading="eager"
+        fetchpriority="high"
+        class="poster-image"
+      />
+
+      <header class="poster-top">
+        <span class="wordmark" translate="no">linway</span>
+        <nav class="index" aria-label="More about Lina">
+          <ol>
+            {sheets.map((s) => (
+              <li>
+                <a class="index-item" href={`#${s.id}`} data-panel={s.id}>
+                  <span class="index-num mono">{s.num}</span>{" "}<span class="index-label">{s.title}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+          <span class="index-marker" aria-hidden="true"></span>
+        </nav>
+      </header>
+
+      <div class="poster-copy">
+        <p class="name mono">Lina Makarenko</p>
+        <h1 id="title"><span>What</span> <span>next?</span></h1>
+        <p class="lede">I prayed about that question for a long time. Then I was accepted for the 2026–⁠27 Ministry Training Scheme at All Souls, London.</p>
+        <div class="actions">
+          <a class="donate" href={site.donate.href}><span>{site.donate.label}</span><Icon name="arrow-up-right" /></a>
+          <a class="social" href={site.instagram.href} rel="me"><Icon name="instagram" /><span>Instagram</span></a>
+        </div>
+      </div>
+    </section>
+
+    <div class="sheets" id="sheets">
+      {sheets.map((s) => (
+        <section class="sheet" id={s.id} aria-labelledby={`${s.id}-title`} tabindex="-1">
+          <header class="sheet-head">
+            <p class="sheet-num mono" aria-hidden="true">{s.num}</p>
+            <h2 id={`${s.id}-title`} class="mono">{s.title}</h2>
+            <button class="sheet-close mono" type="button" data-close hidden aria-label={`Close ${s.title}`}>Close<Icon name="close" /></button>
+          </header>
+          <div class="sheet-body">
+            {s.paragraphs.map((p) => <p>{p}</p>)}
+            {s.list && (
+              <ol class="prayer-list">
+                {s.list.map((item, i) => <li><span class="mono" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>{item}</li>)}
+              </ol>
+            )}
+          </div>
+        </section>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { reducePanels, type PanelAction, type PanelState } from '../lib/panels.ts';
+
+  const nav = document.querySelector<HTMLElement>('.index');
+  const sheets = document.getElementById('sheets');
+  const head = document.querySelector<HTMLElement>('.poster-top');
+  const actions = document.querySelector<HTMLElement>('.actions');
+
+  if (nav && sheets && head && actions) {
+    let state: PanelState = { open: null };
+    const triggers = new Map<string, HTMLButtonElement>();
+    const panel = (id: string) => document.getElementById(id)!;
+
+    // Upgrade the no-JS anchor links into toggle buttons for the sheets.
+    for (const link of nav.querySelectorAll<HTMLAnchorElement>('a[data-panel]')) {
+      const id = link.dataset.panel!;
+      const button = document.createElement('button');
+      // Keep class and Astro's scoped-style attribute; drop href.
+      for (const { name, value } of link.attributes) if (name !== 'href') button.setAttribute(name, value);
+      button.type = 'button';
+      button.innerHTML = link.innerHTML;
+      button.setAttribute('aria-controls', id);
+      button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('click', () => dispatch({ type: 'toggle', id }));
+      link.replaceWith(button);
+      triggers.set(id, button);
+    }
+
+    // Sheets hang from the bottom of the index, inside the header: Tab order
+    // follows the eye and the sheet stays attached however the index wraps.
+    head.append(sheets);
+    for (const close of sheets.querySelectorAll<HTMLButtonElement>('[data-close]')) {
+      close.hidden = false;
+      close.addEventListener('click', () => dispatch({ type: 'close' }));
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && state.open) dispatch({ type: 'close' });
+    });
+
+    // The marker sits under the active index cell; the sheet's tab edge reads it too.
+    function placeMarker(id: string, jump: boolean) {
+      // Measured against the index box (offsetLeft would depend on which
+      // ancestor happens to be transformed).
+      const cell = triggers.get(id)!.getBoundingClientRect();
+      const box = nav!.getBoundingClientRect();
+      head!.classList.toggle('marker-jump', jump);
+      head!.style.setProperty('--mx', `${cell.left - box.left}px`);
+      head!.style.setProperty('--mw', `${cell.width}px`);
+      head!.style.setProperty('--my', `${cell.bottom - box.top}px`);
+      if (jump) { head!.getBoundingClientRect(); head!.classList.remove('marker-jump'); }
+    }
+
+    // Fit the sheet between the index and the actions (or the screen edge);
+    // longer text scrolls inside it.
+    function fit(el: HTMLElement) {
+      const top = el.getBoundingClientRect().top;
+      const actionsTop = actions!.getBoundingClientRect().top;
+      const bottom = actionsTop > top + 200 ? actionsTop - 16 : innerHeight - 12;
+      el.style.maxHeight = `${Math.max(160, Math.min(bottom, innerHeight - 12) - top)}px`;
+    }
+    addEventListener('resize', () => { if (state.open) { placeMarker(state.open, true); fit(panel(state.open)); } });
+
+    function show(id: string, quick: boolean) {
+      const el = panel(id);
+      el.classList.toggle('is-quick', quick);
+      el.classList.add('is-shown');
+      fit(el);
+      el.getBoundingClientRect(); // commit the start state so the transition runs
+      el.classList.add('is-open');
+    }
+
+    function hide(id: string, instant: boolean) {
+      const el = panel(id);
+      el.classList.remove('is-open');
+      if (instant) return el.classList.remove('is-shown');
+      // Matches the close transition; a reopen in the meantime keeps it shown.
+      setTimeout(() => { if (!el.classList.contains('is-open')) el.classList.remove('is-shown'); }, 220);
+    }
+
+    function dispatch(action: PanelAction) {
+      const previous = state.open;
+      const result = reducePanels(state, action);
+      state = result.state;
+      const switching = previous !== null && state.open !== null;
+      if (state.open) placeMarker(state.open, previous === null);
+      head!.classList.toggle('has-open', state.open !== null);
+      if (previous && previous !== state.open) hide(previous, switching);
+      if (state.open && state.open !== previous) show(state.open, switching);
+      for (const [id, button] of triggers) button.setAttribute('aria-expanded', String(id === state.open));
+      if (result.focus) (result.focus.to === 'panel' ? panel(result.focus.id) : triggers.get(result.focus.id))?.focus({ preventScroll: true });
+    }
+  }
+</script>
+
+<style>
+  /* ---------- Poster: one screen, one photograph ---------- */
+  .poster {
+    --safe-top: max(clamp(0.9rem, 2.2vw, 1.75rem), env(safe-area-inset-top));
+    --safe-left: max(var(--gutter), env(safe-area-inset-left));
+    --safe-right: max(var(--gutter), env(safe-area-inset-right));
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr); /* never wider than the screen */
+    grid-template-rows: auto 1fr;
+    min-height: 100svh;
+    overflow: hidden;
+    background: #a9c3da; /* the sky colour shows first, before the photo reveal */
+  }
+
+  /* <picture> (and its <source>s) must not take grid rows. */
+  .poster > :global(picture) { position: absolute; inset: 0; z-index: -3; }
+  .poster :global(.poster-image) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 64% 42%;
+  }
+
+  /* Pale scrim on the copy side; the photo's left edge is already soft sky. */
+  .poster::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: linear-gradient(90deg, rgb(var(--color-mist) / 0.9) 0%, rgb(var(--color-mist) / 0.62) 34%, rgb(var(--color-mist) / 0) 58%);
+  }
+
+  /* ---------- Top: wordmark, then the index as part of the type column ---------- */
+  .poster-top {
+    --mx: 0px;
+    --mw: 0px;
+    --my: 0px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+    width: min(100%, calc(38rem + var(--safe-left)));
+    padding: var(--safe-top) var(--safe-right) 0 var(--safe-left);
+  }
+  .wordmark { font-size: 1.35rem; font-weight: 600; font-stretch: 85%; letter-spacing: -0.02em; line-height: 1; }
+
+  .index { position: relative; }
+  .index ol {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: rgb(var(--color-mist) / 0.94);
+  }
+  /* One ink rule across the whole index; it draws in on arrival. */
+  .index ol::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: var(--color-ink);
+    transform-origin: left;
+  }
+  .index li { flex: 1 1 5.5rem; }
+  .index li + li { border-left: 1px solid rgb(23 33 42 / 0.22); }
+
+  .index-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.9rem 0.65rem;
+    border: 0;
+    background: none;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+  .index-num { color: var(--color-oxblood); }
+  .index-label {
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: transform 120ms var(--ease-out);
+  }
+  .index-item:active .index-label { transform: translateY(1px); }
+  .index-item[aria-expanded="true"] { background: var(--color-paper); }
+  .index-item:focus-visible { outline-offset: -3px; }
+  @media (hover: hover) and (pointer: fine) {
+    .index-item:hover { background: var(--color-paper); }
+  }
+
+  /* The marker: one oxblood bar under the active cell. It slides between cells
+     and sits on the sheet's top edge, so tab and sheet read as one object. */
+  .index-marker {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    top: calc(var(--my) - 2px);
+    width: var(--mw);
+    height: 4px;
+    background: var(--color-oxblood);
+    transform: translateX(var(--mx)) scaleY(0);
+    transform-origin: bottom;
+    transition: transform 240ms var(--ease-in-out), width 240ms var(--ease-in-out), top 240ms var(--ease-in-out);
+    pointer-events: none;
+  }
+  .has-open .index-marker { transform: translateX(var(--mx)) scaleY(1); }
+  .marker-jump .index-marker { transition: none; }
+
+  /* ---------- Poster copy ---------- */
+  .poster-copy {
+    align-self: center;
+    width: min(100%, 44rem);
+    padding: clamp(1.25rem, 3.5vh, 2.75rem) var(--safe-right) max(clamp(1.75rem, 6vh, 4rem), env(safe-area-inset-bottom)) var(--safe-left);
+  }
+  .name { margin: 0; color: var(--color-oxblood-deep); letter-spacing: 0.14em; }
+
+  h1 {
+    display: flex;
+    flex-direction: column;
+    margin: 0.5rem 0 1.25rem;
+    font-size: clamp(4rem, 10vw, 10rem);
+    font-weight: 800;
+    font-stretch: 68%;
+    line-height: 0.82;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .lede { max-width: min(26rem, 34vw); margin: 0 0 1.6rem; font-size: 1.1em; line-height: 1.45; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; }
+
+  /* Donate: the one solid, warm object. Hover deepens and lifts the arrow;
+     press sinks the whole button. */
+  .donate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 100%;
+    min-height: 3.1rem;
+    padding: 0.75rem 1.2rem;
+    background: var(--color-oxblood);
+    color: var(--color-paper);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.16);
+    transition: background-color 140ms ease, box-shadow 140ms ease, transform 120ms var(--ease-out);
+  }
+  /* At extreme zoom a long word may break rather than be clipped. */
+  .donate span { min-width: 0; overflow-wrap: anywhere; }
+  .donate .icon { transition: transform 180ms var(--ease-out); }
+  .donate:active { transform: scale(0.97); box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.16); }
+
+  /* Instagram: a quiet link. Hover draws a heavier oxblood underline and tilts
+     the mark; press nudges it down. */
+  .social {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: transform 120ms var(--ease-out);
+  }
+  .social span {
+    padding-bottom: 2px;
+    background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat;
+    transition: background-size 180ms var(--ease-out), color 140ms ease;
+  }
+  .social .icon { transition: transform 180ms var(--ease-out), color 140ms ease; }
+  .social:active { transform: translateY(1px); }
+
+  @media (hover: hover) and (pointer: fine) {
+    .donate:hover { background: var(--color-oxblood-deep); box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.28); }
+    .donate:hover .icon { transform: translate(0.18rem, -0.18rem); }
+    .social:hover span { color: var(--color-oxblood-deep); background-size: 100% 3px; }
+    .social:hover .icon { color: var(--color-oxblood-deep); transform: rotate(-8deg) scale(1.08); }
+  }
+
+  /* While a sheet is open, the copy it covers steps back; the actions stay. */
+  .poster-copy > :not(.actions) { transition: opacity 200ms ease; }
+  .poster-top.has-open ~ .poster-copy > :not(.actions) { opacity: 0.14; }
+
+  /* ---------- Sheets ---------- */
+  .sheet-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.75rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--color-ink);
+  }
+  .sheet-num { margin: 0; color: var(--color-oxblood); }
+  .sheet-head h2 { flex: 1; margin: 0; font-size: 0.8125rem; letter-spacing: 0.14em; }
+  .sheet-close {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.75rem;
+    padding: 0 0.25rem 0 0.75rem;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transition: color 120ms ease, transform 120ms var(--ease-out);
+  }
+  .sheet-close[hidden] { display: none; }
+  .sheet-close:active { transform: scale(0.95); }
+  @media (hover: hover) and (pointer: fine) { .sheet-close:hover { color: var(--color-oxblood); } }
+
+  .sheet-body { padding-top: 1rem; }
+  .sheet-body p { margin: 0 0 0.85rem; max-width: 34rem; }
+  .sheet-body p:last-child { margin-bottom: 0; }
+  .prayer-list { margin: 0; padding: 0; list-style: none; font-size: 1.15em; font-weight: 600; }
+  .prayer-list li { display: flex; gap: 0.9rem; align-items: baseline; padding: 0.55rem 0; border-top: 1px solid rgb(23 33 42 / 0.2); }
+  .prayer-list .mono { color: var(--color-oxblood); }
+
+  /* Without JavaScript: the sheets are a plain section under the poster. */
+  .sheets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 2.5rem var(--gutter);
+    padding: 3rem var(--gutter) max(3rem, env(safe-area-inset-bottom));
+    background: var(--color-paper);
+  }
+  .sheet { scroll-margin-top: 1rem; }
+
+  /* With JavaScript: one sheet at a time, hanging from the index. */
+  :global(.js) .sheets {
+    position: absolute;
+    top: 100%;
+    left: var(--safe-left);
+    right: var(--safe-right);
+    display: block;
+    padding: 0;
+    background: none;
+  }
+  :global(.js) .sheet {
+    display: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1.1rem 1.25rem 1.4rem;
+    background: var(--color-paper);
+    box-shadow: 0 22px 50px -26px rgb(23 33 42 / 0.6);
+    /* Unfolds downward from the index; closing folds it back up. */
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 180ms var(--ease-out);
+  }
+  :global(.js) .sheet.is-shown { display: block; }
+  :global(.js) .sheet.is-open { clip-path: inset(0 0 0 0); transition-duration: 260ms; }
+
+  /* Title, then body, follow the unfold by a beat. */
+  :global(.js) .sheet > * {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+    transition: opacity 100ms ease, transform 100ms var(--ease-out);
+  }
+  :global(.js) .sheet.is-open > * { opacity: 1; transform: none; transition-duration: 220ms; }
+  :global(.js) .sheet.is-open > .sheet-head { transition-delay: 70ms; }
+  :global(.js) .sheet.is-open > .sheet-body { transition-delay: 120ms; }
+  /* Switching between sheets: no unfold, just a quick settle of the text. */
+  :global(.js) .sheet.is-quick { clip-path: inset(0); transition: none; }
+  :global(.js) .sheet.is-quick.is-open > .sheet-head { transition-delay: 0ms; }
+  :global(.js) .sheet.is-quick.is-open > .sheet-body { transition-delay: 40ms; }
+  .sheet:focus-visible { outline-offset: 0; }
+
+  /* ---------- Arrival, once: sky colour → photo rises in → headline → index ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+    .poster :global(.poster-image) { animation: reveal 950ms var(--ease-in-out) both; }
+    h1 span { animation: rise 700ms var(--ease-out) 420ms both; }
+    h1 span + span { animation-delay: 500ms; }
+    .index ol::before { animation: rule 650ms var(--ease-out) 620ms both; }
+    .index li { animation: rise-small 500ms var(--ease-out) both; }
+    .index li:nth-child(1) { animation-delay: 680ms; }
+    .index li:nth-child(2) { animation-delay: 740ms; }
+    .index li:nth-child(3) { animation-delay: 800ms; }
+  }
+  @keyframes reveal {
+    from { clip-path: inset(100% 0 0 0); transform: scale(1.06); }
+    to { clip-path: inset(0); transform: none; }
+  }
+  /* Small enough to stay inside the gap under the headline: no overlap with the lede. */
+  @keyframes rise { from { transform: translateY(0.1em); } }
+  @keyframes rise-small { from { transform: translateY(0.5rem); } }
+  @keyframes rule { from { transform: scaleX(0); } }
+
+  /* ---------- Desktop: the index is a full part of the type grid ---------- */
+  @media (min-width: 47.5em) and (orientation: landscape) {
+    .poster-top { gap: 1.25rem; }
+    .index-item { gap: 0.3rem; padding: 0.85rem 1.1rem 0.9rem; }
+    .index-label {
+      font-family: var(--font-sans);
+      font-size: clamp(1.15rem, 0.7rem + 0.75vw, 1.6rem);
+      font-weight: 700;
+      font-stretch: 75%;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    .index-num { font-size: 0.8125rem; }
+  }
+
+  /* ---------- Portrait screens: index on top, Bible in the middle, copy below ---------- */
+  @media (orientation: portrait), (max-width: 47.5em) {
+    .poster :global(.poster-image) { object-position: 70% 30%; }
+    .poster::before { display: none; }
+    .poster-top { width: 100%; gap: 0.75rem; }
+    /* The scrim travels with the copy: a short fade, then a near-solid band. */
+    .poster-copy {
+      align-self: end;
+      width: 100%;
+      padding-top: 4rem;
+      background: linear-gradient(to bottom, rgb(var(--color-mist) / 0) 0, rgb(var(--color-mist) / 0.95) 4rem);
+    }
+    .poster-copy > * { max-width: 32rem; }
+    h1 { font-size: clamp(4rem, 24vw, 9rem); margin-bottom: 1rem; }
+    .lede { max-width: 30rem; margin-bottom: 1.25rem; font-size: 1em; }
+  }
+
+  /* ---------- Preferences ---------- */
+  @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+    .poster::before { display: none; }
+    .poster-top.has-open ~ .poster-copy > :not(.actions) { opacity: 0; }
+    .poster-copy { margin: 1rem; padding: 1.5rem; background: var(--color-paper); border: 1px solid var(--color-ink); }
+    .index ol { background: var(--color-paper); }
+    :global(.js) .sheet { border: 1px solid var(--color-ink); box-shadow: none; }
+  }
+  @media (forced-colors: active) {
+    .poster-copy, .index ol, :global(.js) .sheet { background: Canvas; border: 1px solid CanvasText; }
+    .donate { border: 2px solid ButtonText; }
+    .index-marker { background: Highlight; }
+    .index-item[aria-expanded="true"] { outline: 2px solid Highlight; }
+    /* Forced colours draw a backplate per line; tight leading would let it cover the next line. */
+    h1 { line-height: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* Keep colour and opacity feedback; drop movement and the unfold. */
+    .index-marker { transition: none; }
+    :global(.js) .sheet, :global(.js) .sheet.is-open { clip-path: none; transition: none; }
+    :global(.js) .sheet > *, :global(.js) .sheet.is-open > * { transform: none; transition-property: opacity; transition-delay: 0ms; }
+    .donate, .donate:active, .social:active, .sheet-close:active,
+    .index-item:active .index-label, .donate:hover .icon, .social:hover .icon { transform: none; }
+  }
+</style>

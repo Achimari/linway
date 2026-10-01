@@ -1,0 +1,18 @@
+# Prepared private source material stays local.
+/*.pdf
+/*.docx
+/MyCV/
+/.working/
+/docs/references/
+.DS_Store
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+!.env.example
+*.pem
+.claude/settings.local.json
+
+.playwright-mcp/
+/.backups/

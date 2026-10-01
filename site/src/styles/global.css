@@ -1,0 +1,60 @@
+/* linway — archival index on one photograph */
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+:root {
+  --color-sky-light: #dceaf3;
+  --color-mist: 237 243 247; /* pale sky, as RGB channels for scrims */
+  --color-paper: #fbf8f2;
+  --color-ink: #17212a;
+  --color-ink-soft: #3a4650;
+  --color-oxblood: #8b2e3d;
+  --color-oxblood-deep: #6f2230;
+
+  /* Archivo (OFL 1.1) has a width axis: condensed for the headline, normal for text. */
+  --font-sans: "Archivo Variable", "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* IBM Plex Mono (OFL 1.1) for index numbers and labels. */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --gutter: clamp(1.25rem, 4.5vw, 4.5rem);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--color-sky-light); }
+
+body {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: rgb(141 184 218 / 0.35);
+}
+
+img { display: block; max-width: 100%; }
+h1, h2 { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+a { color: inherit; touch-action: manipulation; text-underline-offset: 0.25em; text-decoration-thickness: 1px; }
+button { font: inherit; color: inherit; touch-action: manipulation; }
+:focus-visible { outline: 3px solid var(--color-oxblood); outline-offset: 3px; }
+
+.icon { flex: none; width: 1.15em; height: 1.15em; }
+
+/* Index-card label: monospaced, upper case, never tiny. */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; }
+}

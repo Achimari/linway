@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site.ts';
+---
+
+<BaseLayout title="Page not found — linway" description="This page could not be found.">
+  <main class="lost">
+    <p class="label">404 · <span translate="no">linway</span></p>
+    <h1>This page isn’t here.</h1>
+    <p>The site is now a single page about Lina Makarenko.</p>
+    <p class="links">
+      <a href="/">Go to the home page</a>
+      <a href={site.donate.href}>{site.donate.label}</a>
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .lost {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    min-height: 100svh;
+    padding: 2rem var(--gutter);
+    background: var(--color-sky-light);
+  }
+  h1 { margin: 0; font-size: clamp(2.6rem, 7vw, 5.5rem); line-height: 0.95; letter-spacing: -0.04em; }
+  p { margin: 0; max-width: 32rem; }
+  .links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+  .links a { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 650; }
+</style>
