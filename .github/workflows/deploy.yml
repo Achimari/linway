@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-linway
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: site
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      - run: npm test
+
+      # Built here, not on the droplet: it has 961 MiB of RAM and already runs
+      # the NoOr app, and Astro's image pipeline is the memory-hungry part.
+      - run: npm run build
+
+      # Checks the built output itself: no stray source files, no leaked review
+      # comments. `audit:release` is the stricter publication gate and is
+      # deliberately not run here -- it asserts approvals that are not CI's to
+      # make. While it would fail, pages ship `noindex, nofollow`.
+      - run: npm run audit:dist
+
+      - name: Ship dist/ to the droplet
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          trap 'rm -f ~/.ssh/deploy_key' EXIT
+          printf '%s\n' '206.81.29.175 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfBRSq5k2QIWyOX8n81pna3F8D4RIeCrAQL2a9g8J9F' > ~/.ssh/known_hosts
+          # The key is pinned to /usr/local/sbin/linway-deploy by a forced
+          # command, which refuses a payload with no index.html before touching
+          # the live site.
+          tar -cz -C dist . | ssh -i ~/.ssh/deploy_key -o BatchMode=yes root@206.81.29.175
