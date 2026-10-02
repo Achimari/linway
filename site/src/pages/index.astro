@@ -74,7 +74,10 @@ const nav = [
     <main class="stage">
       <section class="scene scene-home" id="home" aria-labelledby="title">
         <div class="text">
-          <p class="name mono">Lina Makarenko</p>
+          <div class="home-kicker">
+            <p class="name mono">Lina Makarenko</p>
+            <a class="next mono" href="#story">Next: Story<Icon name="arrow-right" /></a>
+          </div>
           <h1 id="title"><span>What</span> <span>next?</span></h1>
           <p class="lede">I prayed about that question for a long time. Then I was accepted for the 2026–⁠27 Ministry Training Scheme at All Souls, London.</p>
         </div>
@@ -443,6 +446,7 @@ const nav = [
   .wordmark {
     display: inline-flex;
     align-items: center;
+    translate: 0 -0.2rem;
     min-height: 2.75rem;
     font-size: 1.35rem;
     font-weight: 600;
@@ -530,6 +534,7 @@ const nav = [
   :is(.route, .lines, .requests) > :nth-child(4) { --d: 420ms; }
   .plate { --d: 140ms; }
   /* ---------- Home ---------- */
+  .home-kicker { display: flex; align-items: center; gap: 1rem; max-width: 21rem; }
   .name { margin: 0; color: var(--color-oxblood-deep); letter-spacing: 0.14em; }
   h1 {
     display: flex;
@@ -820,7 +825,7 @@ const nav = [
     .masthead li:nth-child(3) { animation-delay: 720ms; }
     .masthead li:nth-child(4) { animation-delay: 760ms; }
     .masthead li:nth-child(5) { animation-delay: 800ms; }
-    #home .name, #home .lede, .actions { animation: arrive 420ms var(--ease-out) 720ms backwards; }
+    #home .home-kicker, #home .lede, .actions { animation: arrive 420ms var(--ease-out) 720ms backwards; }
   }
   @keyframes reveal {
     from { clip-path: inset(100% 0 0 0); transform: scale(1.06); }

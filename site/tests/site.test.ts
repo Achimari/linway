@@ -28,15 +28,16 @@ test('single-page site: routes, actions, scenes and audit', { timeout: 180_000 }
   assert.equal((home.match(/<h1/g) ?? []).length, 1);
 
   // Links: the intro's enter and skip (both #home, so they work without
-  // script), wordmark home, five chapters, each chapter's next link, the two
+  // script), wordmark home, five chapters, Home's Story arrow, each chapter's next link, the two
   // actions (shared by every state), then Lina's two contacts (shown on Support).
   const hrefs = [...home.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(hrefs, [
     '#home', '#home', '#home', '#story', '#year', '#month', '#support', '#prayer',
-    '#year', '#month', '#support', '#prayer', '#home',
+    '#story', '#year', '#month', '#support', '#prayer', '#home',
     'https://www.stewardship.org.uk/partners/20645926', 'https://www.instagram.com/linren__/',
     'https://wa.me/447778474925', 'mailto:linamak1111@gmail.com',
   ]);
+  assert.match(home, /class="next mono" href="#story"[^>]*>Next: Story/);
   // Contacts: a labelled section with exactly these visible values; no form.
   const contact = home.match(/<section[^>]*class="contact"[^>]*>([\s\S]*?)<\/section>/);
   assert.ok(contact, 'contact section exists');
