@@ -21,7 +21,8 @@ This workspace contains a working private-preview Astro site in `site/`. Read `s
 - Use sourced history, distinguish plans from completed events, and do not infer current participation from a programme calendar. Read the evidence notes in `docs/CONTENT-AUDIT.md` when a fact is uncertain.
 - Website copy in `docs/CONTENT-DRAFT.md` is proposed editing for Lina's review, not automatically approved for publication. Render safe copy in local previews; omit unconfirmed present-tense claims.
 - Do not invent ministry roles, qualifications, dates, impact statistics, testimonials, social accounts, articles, donation URLs, or public contact details.
-- No addresses, personal phone numbers, date of birth, immigration identifiers, signatures, medical information, reference contacts, or private third-party stories in public output.
+- Public contacts: the site owner supplied exactly two for Lina on 2 October 2026 — WhatsApp `+44 77 7847 4925` (`https://wa.me/447778474925`) and email `linamak1111@gmail.com` (`mailto:linamak1111@gmail.com`). These, kept in `site/src/data/site.ts` (`site.contact`), are the only phone number and email allowed in public output; `audit:dist` rejects any other.
+- No addresses, other phone numbers or email addresses, date of birth, immigration identifiers, signatures, medical information, reference contacts, or private third-party stories in public output.
 - Hide any unavailable link or action. Do not render `href="#"`, fake form success, a pretend newsletter signup, or a CV download without a real sanitized PDF.
 - Journal ideas remain drafts. Production routes, lists, RSS and sitemap must exclude drafts and future-dated posts using the same publication rule.
 

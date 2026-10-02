@@ -1,44 +1,35 @@
 ---
 // Copy: condensed from Lina’s own drafts and prayer letter; needs her final
-// approval before deployment (site.copyReviewedByLina).
+// approval before deployment (site.copyReviewedByLina). Sources and open
+// questions for every line: docs/COPY-LEDGER.md.
+//
+// One poster, six states. Each chapter is a :target scene, so the URL hash
+// alone decides what shows: links, Back and deep links work without
+// JavaScript, and rapid switching can never leave a stale state.
 import { Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 import { site } from '../data/site.ts';
 import hero from '../assets/hero/hero-sky.jpg';
+import gathering from '../assets/gallery/gathering.jpg';
+import allSouls from '../assets/gallery/all-souls.jpg';
+import freeEnglish from '../assets/gallery/free-english.jpg';
+import cafe from '../assets/gallery/cafe.jpg';
 
-// The wide photo is cropped by object-fit: cover, so on a tall phone screen
-// it renders at ~3.6× the viewport width.
-const heroSizes = '(orientation: portrait) 360vw, max(100vw, 180vh)';
+// The wide photo is cropped by object-fit: cover (and scaled up to 1.22 in
+// some states), so on a tall phone screen it renders at ~4× the viewport width.
+const heroSizes = '(orientation: portrait) 400vw, max(120vw, 210vh)';
+// Chapter photographs fill large panels; widths stop at each source's own size.
+// Eager but low priority: they arrive after the hero, before anyone opens a chapter,
+// so a panel never wipes in empty.
+const plate = { formats: ['avif', 'webp'] as Array<'avif' | 'webp'>, widths: [480, 800, 1200, 1440], loading: 'eager' as const, fetchpriority: 'low' as const, decoding: 'async' as const };
 
-// Index / folio sheets. Without JavaScript they render as a plain section
-// under the poster, and the index links jump to them.
-const sheets = [
-  {
-    id: 'story',
-    num: '01',
-    title: 'Story',
-    paragraphs: [
-      'I grew up in Omsk in a Christian family; my parents were missionaries from Latvia. Faith became my own as a teenager, and I was baptised at 17.',
-      'Since then I’ve helped with youth groups, church camps and worship teams. In 2023 I moved to Latvia to study Business and Management.',
-    ],
-  },
-  {
-    id: 'year',
-    num: '02',
-    title: 'The year',
-    paragraphs: [
-      'As my studies came to an end, I could have gone on to a Master’s or stayed in my job. I didn’t have peace about either.',
-      'Then I heard about the Ministry Training Scheme at All Souls Church in London. I applied and was accepted for 2026–⁠27. The scheme brings Bible teaching, mentoring and practical service together in a local church.',
-    ],
-  },
-  {
-    id: 'prayer',
-    num: '03',
-    title: 'Prayer',
-    paragraphs: ['If you pray, please remember:'],
-    list: ['Wisdom for the decisions ahead.', 'The people I’ll meet.', 'Faithfulness in everyday work.'],
-  },
+const nav = [
+  { id: 'story', title: 'Story' },
+  { id: 'year', title: 'The year' },
+  { id: 'month', title: 'First month' },
+  { id: 'support', title: 'Support' },
+  { id: 'prayer', title: 'Prayer' },
 ];
 ---
 
@@ -46,177 +37,372 @@ const sheets = [
   title="Lina Makarenko — linway"
   description="Lina Makarenko was accepted for the 2026–⁠27 Ministry Training Scheme at All Souls, London. Read her story, pray with her, or give through Stewardship."
 >
-  <main>
-    <section class="poster" aria-labelledby="title">
-      <Picture
-        src={hero}
-        formats={['avif', 'webp']}
-        widths={[800, 1200, 1600, 2400]}
-        sizes={heroSizes}
-        alt="A raised hand holding a Bible against a blue sky."
-        loading="eager"
-        fetchpriority="high"
-        class="poster-image"
-      />
+  <div class="gate" id="gate">
+    <a class="gate-enter" href="#home" aria-label="Enter linway">
+      <span class="gate-word" aria-hidden="true">LINWA<span class="gate-y">Y<span class="gate-stem"></span></span></span>
+      <span class="gate-foot">
+        <span class="mono">Lina Makarenko</span>
+        <span class="gate-cue mono">Enter<Icon name="arrow-right" /></span>
+      </span>
+    </a>
+    <a class="gate-skip mono" href="#home">Skip intro</a>
+    <span class="gate-line" aria-hidden="true"></span>
+  </div>
 
-      <header class="poster-top">
-        <span class="wordmark" translate="no">linway</span>
-        <nav class="index" aria-label="More about Lina">
-          <ol>
-            {sheets.map((s) => (
-              <li>
-                <a class="index-item" href={`#${s.id}`} data-panel={s.id}>
-                  <span class="index-num mono">{s.num}</span>{" "}<span class="index-label">{s.title}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-          <span class="index-marker" aria-hidden="true"></span>
-        </nav>
-      </header>
+  <div class="poster">
+    <Picture
+      src={hero}
+      formats={['avif', 'webp']}
+      widths={[800, 1200, 1600, 2400]}
+      sizes={heroSizes}
+      alt="A raised hand holding a Bible against a blue sky."
+      loading="eager"
+      fetchpriority="high"
+      class="poster-image"
+    />
+    <div class="scrim" aria-hidden="true"></div>
 
-      <div class="poster-copy">
-        <p class="name mono">Lina Makarenko</p>
-        <h1 id="title"><span>What</span> <span>next?</span></h1>
-        <p class="lede">I prayed about that question for a long time. Then I was accepted for the 2026–⁠27 Ministry Training Scheme at All Souls, London.</p>
-        <div class="actions">
-          <a class="donate" href={site.donate.href}><span>{site.donate.label}</span><Icon name="arrow-up-right" /></a>
-          <a class="social" href={site.instagram.href} rel="me"><Icon name="instagram" /><span>Instagram</span></a>
+    <header class="masthead">
+      <a class="wordmark" href="#home" translate="no" aria-label="linway, home">linway</a>
+      <nav aria-label="Chapters">
+        <ul>
+          {nav.map((n) => <li><a href={`#${n.id}`}>{n.title}</a></li>)}
+        </ul>
+      </nav>
+    </header>
+
+    <main class="stage">
+      <section class="scene scene-home" id="home" aria-labelledby="title">
+        <div class="text">
+          <p class="name mono">Lina Makarenko</p>
+          <h1 id="title"><span>What</span> <span>next?</span></h1>
+          <p class="lede">I prayed about that question for a long time. Then I was accepted for the 2026–⁠27 Ministry Training Scheme at All Souls, London.</p>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <div class="sheets" id="sheets">
-      {sheets.map((s) => (
-        <section class="sheet" id={s.id} aria-labelledby={`${s.id}-title`} tabindex="-1">
-          <header class="sheet-head">
-            <p class="sheet-num mono" aria-hidden="true">{s.num}</p>
-            <h2 id={`${s.id}-title`} class="mono">{s.title}</h2>
-            <button class="sheet-close mono" type="button" data-close hidden aria-label={`Close ${s.title}`}>Close<Icon name="close" /></button>
-          </header>
-          <div class="sheet-body">
-            {s.paragraphs.map((p) => <p>{p}</p>)}
-            {s.list && (
-              <ol class="prayer-list">
-                {s.list.map((item, i) => <li><span class="mono" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>{item}</li>)}
-              </ol>
-            )}
+      <section class="scene scene-story" id="story" aria-labelledby="story-title">
+        <div class="text">
+          <div class="kicker">
+            <h2 id="story-title" class="mono">Story</h2>
+            <a class="next mono" href="#year">Next: The year<Icon name="arrow-right" /></a>
           </div>
-        </section>
-      ))}
-    </div>
-  </main>
+          <p class="display">Faith became my own.</p>
+          <ol class="route">
+            <li><span class="stop">Omsk</span><p>I grew up in a Christian family. My parents were missionaries from Latvia.</p></li>
+            <li><span class="stop">At 17</span><p>I was baptised. Then came youth groups, church camps and worship teams.</p></li>
+            <li><span class="stop">Riga, 2023</span><p>I moved to Latvia to study Business and Management, and worked alongside.</p></li>
+            <li><span class="stop">What next?</span><p>A Master’s, or staying in my job. Both were good. I had peace about neither.</p></li>
+          </ol>
+        </div>
+        <figure class="plate plate-gathering">
+          <Picture src={gathering} {...plate} sizes="(orientation: portrait) 100vw, 58vw" alt="Lina, seen from behind in a room of green chairs, her hair up and her arm around the shoulders of the smaller person beside her, who wears a hood." />
+        </figure>
+      </section>
+
+      <section class="scene scene-year" id="year" aria-labelledby="year-title">
+        <div class="text">
+          <div class="kicker">
+            <h2 id="year-title" class="mono">The year</h2>
+            <a class="next mono" href="#month">Next: First month<Icon name="arrow-right" /></a>
+          </div>
+          <p class="display">2026–⁠27</p>
+          <p class="verbs"><span>Learn</span> <span>Serve</span> <span>Grow</span> <span>Discern</span></p>
+          <div class="lines">
+            <p>The Ministry Training Scheme at All Souls Church, London brings practical ministry, theological training and discipleship together in one local church.</p>
+            <p>At Free English, people from different countries come to learn English and spend time together. I’m learning how to serve there alongside the team.</p>
+            <p>I want to build real friendships there, learn from experienced leaders, and take time to see where God leads next.</p>
+          </div>
+          {/* One photograph at a time; native radios work with arrow keys and without script. */}
+          <fieldset class="switch">
+            <legend class="visually-hidden">Photo</legend>
+            <label><input type="radio" name="year-photo" value="church" checked /><span>All Souls</span></label>
+            <label><input type="radio" name="year-photo" value="english" /><span>Free English</span></label>
+          </fieldset>
+        </div>
+        <div class="plates plates-year">
+          <figure class="plate plate-church">
+            <Picture src={allSouls} {...plate} sizes="(orientation: portrait) 100vw, 54vw" alt="A round, columned church porch and tall needle spire lit up at night, a blue-lit building behind, cyclists and a bus in the street below." />
+          </figure>
+          <figure class="plate plate-english">
+            <Picture src={freeEnglish} {...plate} sizes="(orientation: portrait) 100vw, 54vw" alt="Lina and another young woman smiling, both wearing ‘Hello!’ name badges, in a hall of people at tables; the screen behind reads ‘Free English Classes’." />
+          </figure>
+        </div>
+      </section>
+
+      <section class="scene scene-month" id="month" aria-labelledby="month-title">
+        <div class="text">
+          <div class="kicker">
+            <h2 id="month-title" class="mono">First month</h2>
+            <a class="next mono" href="#support">Next: Support<Icon name="arrow-right" /></a>
+          </div>
+          <p class="display">One month in.</p>
+          <div class="lines">
+            <p>A new city, church and team. I’m still finding my rhythm, and speaking English every day has been the hardest part.</p>
+            <p>At Free English, people come to learn English and spend time together. I’m getting to know the team and the people who come.</p>
+            <p>We’re studying 1 Corinthians and talking about discipleship. I’m seeing how much can happen through ordinary friendships and conversations.</p>
+            <p>I don’t need to know or do everything yet. I’m here to learn.</p>
+          </div>
+          {/* Native disclosure: keyboard and no-JS friendly, opens in place. */}
+          <details class="more">
+            <summary>More from the month</summary>
+            <p>In the first month, Free English held four days of sessions. The morning group is for women; evening sessions are open to everyone. At a formation conference in Nottingham, I was reminded to care for my own relationship with God as I learn to serve others.</p>
+          </details>
+        </div>
+        <figure class="plate plate-cafe">
+          <Picture src={cafe} {...plate} sizes="(orientation: portrait) 100vw, 64vw" alt="Lina and two friends sit together in a café, holding green iced drinks." />
+        </figure>
+      </section>
+
+      <section class="scene scene-support" id="support" aria-labelledby="support-title">
+        <div class="text">
+          <div class="kicker">
+            <h2 id="support-title" class="mono">Support</h2>
+            <a class="next mono" href="#prayer">Next: Prayer<Icon name="arrow-right" /></a>
+          </div>
+          <p class="display"><span>Voluntary.</span> <span>Unpaid.</span></p>
+          <div class="lines">
+            <p>The Ministry Training Scheme is a voluntary training year. Trainees aren’t paid a salary.</p>
+            <p>Gifts help with the practical side of the year, like accommodation, travel and day-to-day living.</p>
+            <p>Prayer matters most to me. If you’d also like to give, my Stewardship page is the way to do it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene scene-prayer" id="prayer" aria-labelledby="prayer-title">
+        <div class="text">
+          <div class="kicker">
+            <h2 id="prayer-title" class="mono">Prayer</h2>
+            <a class="next mono" href="#home"><Icon name="arrow-left" />Back to the start</a>
+          </div>
+          <p class="intro">If you pray, please remember:</p>
+          <ol class="requests">
+            <li><span class="mono" aria-hidden="true">01</span>For my relationship with God to stay at the centre of this year.</li>
+            <li><span class="mono" aria-hidden="true">02</span>For confidence to understand and speak English.</li>
+            <li><span class="mono" aria-hidden="true">03</span>For the people at Free English, and for our team to serve well together.</li>
+          </ol>
+        </div>
+      </section>
+
+      <div class="actions">
+        <a class="donate" href={site.donate.href}><span class="donate-text"><span class="donate-label">{site.donate.label}</span><span class="visually-hidden">. </span><span class="donate-via">{site.donate.via}</span></span><Icon name="arrow-up-right" /></a>
+        <a class="social" href={site.instagram.href} rel="me"><Icon name="instagram" /><span>Instagram</span></a>
+      </div>
+      <section class="contact" aria-labelledby="contact-title">
+        <h2 id="contact-title" class="mono">Contact Lina</h2>
+        <ul>
+          <li><a href={site.contact.whatsapp.href}><span class="contact-kind">WhatsApp</span> {site.contact.whatsapp.label}</a></li>
+          <li><a href={site.contact.email.href}><span class="contact-kind">Email</span> {site.contact.email.label}</a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
 </BaseLayout>
 
 <script>
-  import { reducePanels, type PanelAction, type PanelState } from '../lib/panels.ts';
+  // Enhancement only: chapters switch through :target in CSS.
+  const root = document.documentElement;
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.masthead nav a')];
+  const current = () => links.find((a) => a.hash === location.hash);
+  const sync = () => {
+    for (const a of links) a.removeAttribute('aria-current');
+    current()?.setAttribute('aria-current', 'location');
+  };
+  addEventListener('hashchange', sync);
+  sync();
 
-  const nav = document.querySelector<HTMLElement>('.index');
-  const sheets = document.getElementById('sheets');
-  const head = document.querySelector<HTMLElement>('.poster-top');
-  const actions = document.querySelector<HTMLElement>('.actions');
+  // Entry: shown only when the head script set .entry (JS on, first visit this
+  // session, no deep link, motion allowed). Its links point to #home, so even
+  // if this script fails, following them hides the gate through CSS.
+  const gate = document.getElementById('gate')!;
+  const poster = document.querySelector<HTMLElement>('.poster')!;
+  const entering = () => root.classList.contains('entry');
+  let running = false;
 
-  if (nav && sheets && head && actions) {
-    let state: PanelState = { open: null };
-    const triggers = new Map<string, HTMLButtonElement>();
-    const panel = (id: string) => document.getElementById(id)!;
-
-    // Upgrade the no-JS anchor links into toggle buttons for the sheets.
-    for (const link of nav.querySelectorAll<HTMLAnchorElement>('a[data-panel]')) {
-      const id = link.dataset.panel!;
-      const button = document.createElement('button');
-      // Keep class and Astro's scoped-style attribute; drop href.
-      for (const { name, value } of link.attributes) if (name !== 'href') button.setAttribute(name, value);
-      button.type = 'button';
-      button.innerHTML = link.innerHTML;
-      button.setAttribute('aria-controls', id);
-      button.setAttribute('aria-expanded', 'false');
-      button.addEventListener('click', () => dispatch({ type: 'toggle', id }));
-      link.replaceWith(button);
-      triggers.set(id, button);
-    }
-
-    // Sheets hang from the bottom of the index, inside the header: Tab order
-    // follows the eye and the sheet stays attached however the index wraps.
-    head.append(sheets);
-    for (const close of sheets.querySelectorAll<HTMLButtonElement>('[data-close]')) {
-      close.hidden = false;
-      close.addEventListener('click', () => dispatch({ type: 'close' }));
-    }
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && state.open) dispatch({ type: 'close' });
-    });
-
-    // The marker sits under the active index cell; the sheet's tab edge reads it too.
-    function placeMarker(id: string, jump: boolean) {
-      // Measured against the index box (offsetLeft would depend on which
-      // ancestor happens to be transformed).
-      const cell = triggers.get(id)!.getBoundingClientRect();
-      const box = nav!.getBoundingClientRect();
-      head!.classList.toggle('marker-jump', jump);
-      head!.style.setProperty('--mx', `${cell.left - box.left}px`);
-      head!.style.setProperty('--mw', `${cell.width}px`);
-      head!.style.setProperty('--my', `${cell.bottom - box.top}px`);
-      if (jump) { head!.getBoundingClientRect(); head!.classList.remove('marker-jump'); }
-    }
-
-    // Fit the sheet between the index and the actions (or the screen edge);
-    // longer text scrolls inside it.
-    function fit(el: HTMLElement) {
-      const top = el.getBoundingClientRect().top;
-      const actionsTop = actions!.getBoundingClientRect().top;
-      const bottom = actionsTop > top + 200 ? actionsTop - 16 : innerHeight - 12;
-      el.style.maxHeight = `${Math.max(160, Math.min(bottom, innerHeight - 12) - top)}px`;
-    }
-    addEventListener('resize', () => { if (state.open) { placeMarker(state.open, true); fit(panel(state.open)); } });
-
-    function show(id: string, quick: boolean) {
-      const el = panel(id);
-      el.classList.toggle('is-quick', quick);
-      el.classList.add('is-shown');
-      fit(el);
-      el.getBoundingClientRect(); // commit the start state so the transition runs
-      el.classList.add('is-open');
-    }
-
-    function hide(id: string, instant: boolean) {
-      const el = panel(id);
-      el.classList.remove('is-open');
-      if (instant) return el.classList.remove('is-shown');
-      // Matches the close transition; a reopen in the meantime keeps it shown.
-      setTimeout(() => { if (!el.classList.contains('is-open')) el.classList.remove('is-shown'); }, 220);
-    }
-
-    function dispatch(action: PanelAction) {
-      const previous = state.open;
-      const result = reducePanels(state, action);
-      state = result.state;
-      const switching = previous !== null && state.open !== null;
-      if (state.open) placeMarker(state.open, previous === null);
-      head!.classList.toggle('has-open', state.open !== null);
-      if (previous && previous !== state.open) hide(previous, switching);
-      if (state.open && state.open !== previous) show(state.open, switching);
-      for (const [id, button] of triggers) button.setAttribute('aria-expanded', String(id === state.open));
-      if (result.focus) (result.focus.to === 'panel' ? panel(result.focus.id) : triggers.get(result.focus.id))?.focus({ preventScroll: true });
-    }
+  function finish() {
+    if (!entering()) return;
+    for (const a of gate.getAnimations({ subtree: true })) a.cancel();
+    root.classList.replace('entry', 'entered');
+    poster.inert = false;
+    try { sessionStorage.setItem('linway-entered', '1'); } catch {}
+    if (gate.contains(document.activeElement)) document.querySelector<HTMLElement>('.wordmark')!.focus({ preventScroll: true });
   }
+
+  // The Y's stem becomes the line: it grows to full height, then travels left
+  // across the screen as the edge of the reveal.
+  function enter() {
+    if (running) return finish();
+    running = true;
+    const stem = gate.querySelector('.gate-stem')!.getBoundingClientRect();
+    const line = gate.querySelector<HTMLElement>('.gate-line')!;
+    const w = innerWidth;
+    const h = innerHeight;
+    // While it travels the stem thins to a hairline; its right edge is the reveal edge.
+    const thin = 3;
+    line.style.left = `${stem.left}px`;
+    line.style.width = `${stem.width}px`;
+    const ease = 'cubic-bezier(0.77, 0, 0.175, 1)';
+    const grow = 240;
+    const travel = 560;
+    const timing = { duration: grow + travel, fill: 'forwards' } as const;
+    const at = grow / (grow + travel);
+    gate.querySelector('.gate-y')!.animate({ color: ['var(--color-oxblood)', 'transparent'] }, { duration: 140, fill: 'forwards' });
+    line.animate([
+      { offset: 0, easing: ease, clipPath: `inset(${stem.top}px 0 ${h - stem.bottom}px 0)`, transform: 'none' },
+      { offset: at, easing: ease, clipPath: 'inset(0 0 0 0)', transform: 'none' },
+      { offset: 1, clipPath: 'inset(0 0 0 0)', transform: `translateX(${-stem.left}px) scaleX(${thin / stem.width})` },
+    ], timing);
+    gate.animate([
+      { offset: 0, easing: ease, clipPath: 'inset(0 0 0 0)' },
+      { offset: at, easing: ease, clipPath: `inset(0 ${w - stem.right}px 0 0)` },
+      { offset: 1, clipPath: `inset(0 ${w - thin}px 0 0)` },
+    ], timing).finished.then(finish, () => {});
+  }
+
+  if (entering()) {
+    poster.inert = true;
+    gate.querySelector('.gate-enter')!.addEventListener('click', (e) => { e.preventDefault(); enter(); });
+    gate.querySelector('.gate-skip')!.addEventListener('click', (e) => { e.preventDefault(); finish(); });
+    addEventListener('hashchange', finish);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (entering()) {
+      if (e.key === 'Escape') finish();
+      else if (e.key === 'Enter' && !gate.contains(document.activeElement)) { e.preventDefault(); enter(); }
+      return;
+    }
+    const link = e.key === 'Escape' && current();
+    if (!link) return;
+    location.hash = 'home';
+    link.focus({ preventScroll: true });
+  });
 </script>
 
 <style>
-  /* ---------- Poster: one screen, one photograph ---------- */
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* Registered so the scrim and accent can transition between states. */
+  @property --s0 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+  @property --s1 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+  @property --reach { syntax: '<percentage>'; inherits: true; initial-value: 58%; }
+  @property --band { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+  @property --accent { syntax: '<color>'; inherits: true; initial-value: #8b2e3d; }
+
+  /* ---------- Entry: LINWAY, whose Y becomes the line that opens the page ---------- */
+  .gate { display: none; }
+  :global(.entry) .gate {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: var(--color-sky-light);
+    color: var(--color-ink);
+  }
+  /* If the script never runs, the #home link still gets the visitor in. */
+  :global(.entry):has(.scene:target) .gate { display: none; }
+  .gate-enter {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    gap: clamp(1rem, 3vh, 2rem);
+    padding: 0 var(--gutter);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .gate-enter:focus-visible { outline-offset: -0.75rem; }
+  .gate-word {
+    display: block;
+    font-size: calc((100vw - 2 * var(--gutter)) / 3.02);
+    font-weight: 800;
+    font-stretch: 68%;
+    line-height: 0.74;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .gate-y { position: relative; color: var(--color-oxblood); }
+  /* Sits exactly on the Y's stem; the script reads its box. */
+  .gate-stem { position: absolute; left: 50%; bottom: 0.21em; width: 0.155em; height: 0.27em; translate: -50% 0; }
+  .gate-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .gate-cue { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; color: var(--color-oxblood); }
+  .gate-cue :global(.icon) { transition: transform 180ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .gate-enter:hover .gate-cue :global(.icon) { transform: translateX(0.25rem); }
+  }
+  .gate-skip {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    right: var(--gutter);
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.5rem;
+    text-decoration: underline;
+  }
+  .gate-line {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: var(--color-oxblood);
+    clip-path: inset(50% 0);
+    transform-origin: left;
+    pointer-events: none;
+  }
+  /* While the gate is up, the page's own arrival waits behind it. */
+  :global(.entry):not(:has(.scene:target)) .poster :global(*) { animation-play-state: paused !important; }
+  :global(:is(.entry, .entered)) .poster > :global(picture) { animation: none; }
+
+  /* ---------- The poster and its states ---------- */
   .poster {
-    --safe-top: max(clamp(0.9rem, 2.2vw, 1.75rem), env(safe-area-inset-top));
+    --safe-top: max(clamp(0.6rem, 1.8vw, 1.5rem), env(safe-area-inset-top));
     --safe-left: max(var(--gutter), env(safe-area-inset-left));
     --safe-right: max(var(--gutter), env(safe-area-inset-right));
+    /* Home: pale mist on the copy side, ink type. */
+    --s0: rgb(237 243 247 / 0.9);
+    --s1: rgb(237 243 247 / 0.62);
+    --reach: 58%;
+    --band: 50%;
+    --accent: var(--color-oxblood);
+    --solid: var(--color-paper); /* the scrim when transparency is reduced */
     position: relative;
     isolation: isolate;
     display: grid;
-    grid-template-columns: minmax(0, 1fr); /* never wider than the screen */
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     min-height: 100svh;
-    overflow: hidden;
+    overflow: clip; /* the scaled photo never adds scrollbars */
     background: #a9c3da; /* the sky colour shows first, before the photo reveal */
+    color: var(--color-ink);
+    transition: --s0 500ms ease, --s1 500ms ease, --reach 600ms var(--ease-in-out), --band 600ms var(--ease-in-out), --accent 300ms ease, color 300ms ease;
   }
+  /* Each photo chapter takes its colours from its own photograph. */
+  /* Story: warm paper and the gathering's dark chair green; the brand oxblood marks the turn. */
+  .poster:has(#story:target) {
+    --s0: #f3eadb; --s1: #f3eadb; --reach: 300%; --band: 100%;
+    --accent: #8b2e3d; --line: #1f3a2c; --btn: #1f3a2c; --btn-ink: #f3eadb; --solid: #f3eadb;
+    color: #18291f;
+  }
+  /* The year: All Souls' night and the light of its street lamp. */
+  .poster:has(#year:target) {
+    --s0: #0e1233; --s1: #0e1233; --reach: 300%; --band: 100%;
+    --accent: #f2c27b; --lamp: #f2c27b; --btn: #f2c27b; --btn-ink: #0e1233; --solid: #0e1233;
+    color: #e8ebfb;
+  }
+  /* First month: the café's warm oat light and matcha; espresso ink, the shared oxblood. */
+  .poster:has(#month:target) {
+    --s0: #e7e0c9; --s1: #e7e0c9; --reach: 300%; --band: 100%;
+    --accent: #8b2e3d; --btn: #2c2219; --btn-ink: #f3eadb; --solid: #e7e0c9;
+    color: #2c2219;
+  }
+  /* Support: oxblood over the copy side; the Bible shows again on the right. */
+  .poster:has(#support:target) {
+    --s0: rgb(111 34 48 / 0.97); --s1: rgb(111 34 48 / 0.95); --reach: 64%; --band: 78%;
+    --accent: #f6d3d9; --solid: var(--color-oxblood-deep);
+    --btn: var(--color-paper); --btn-ink: var(--color-oxblood-deep); --btn-hover: #fff;
+    color: var(--color-paper);
+  }
+  /* Prayer: cooler and lighter, more sky. */
+  .poster:has(#prayer:target) { --s0: rgb(237 243 247 / 0.96); --s1: rgb(237 243 247 / 0.8); --reach: 72%; --band: 70%; }
 
   /* <picture> (and its <source>s) must not take grid rows. */
   .poster > :global(picture) { position: absolute; inset: 0; z-index: -3; }
@@ -227,113 +413,124 @@ const sheets = [
     height: 100%;
     object-fit: cover;
     object-position: 64% 42%;
+    /* Each state re-crops the one photograph. Translation stays inside the
+       scale margin, so no edge ever shows. */
+    transition: transform 650ms var(--ease-in-out);
   }
+  .poster:has(#story:target) :global(.poster-image),
+  .poster:has(#month:target) :global(.poster-image) { transform: scale(1.1) translate(4%, -2%); }
+  .poster:has(#year:target) :global(.poster-image) { transform: scale(1.22) translate(4%, 5%); }
+  .poster:has(#support:target) :global(.poster-image) { transform: scale(1.14) translate(5%, 2%); }
+  .poster:has(#prayer:target) :global(.poster-image) { transform: scale(1.08) translate(3%, 3%); }
 
-  /* Pale scrim on the copy side; the photo's left edge is already soft sky. */
-  .poster::before {
-    content: "";
+  .scrim {
     position: absolute;
     inset: 0;
     z-index: -2;
-    background: linear-gradient(90deg, rgb(var(--color-mist) / 0.9) 0%, rgb(var(--color-mist) / 0.62) 34%, rgb(var(--color-mist) / 0) 58%);
+    background: linear-gradient(90deg, var(--s0) 0%, var(--s1) calc(var(--reach) * 0.6), transparent var(--reach));
   }
 
-  /* ---------- Top: wordmark, then the index as part of the type column ---------- */
-  .poster-top {
-    --mx: 0px;
-    --mw: 0px;
-    --my: 0px;
+  /* ---------- Header: wordmark and the chapters, top left ---------- */
+  .masthead {
     position: relative;
     z-index: 2;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.9rem;
-    width: min(100%, calc(38rem + var(--safe-left)));
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 clamp(1.5rem, 3.2vw, 3rem);
     padding: var(--safe-top) var(--safe-right) 0 var(--safe-left);
   }
-  .wordmark { font-size: 1.35rem; font-weight: 600; font-stretch: 85%; letter-spacing: -0.02em; line-height: 1; }
-
-  .index { position: relative; }
-  .index ol {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    background: rgb(var(--color-mist) / 0.94);
-  }
-  /* One ink rule across the whole index; it draws in on arrival. */
-  .index ol::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    height: 2px;
-    background: var(--color-ink);
-    transform-origin: left;
-  }
-  .index li { flex: 1 1 5.5rem; }
-  .index li + li { border-left: 1px solid rgb(23 33 42 / 0.22); }
-
-  .index-item {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.15rem;
-    width: 100%;
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
     min-height: 2.75rem;
-    padding: 0.7rem 0.9rem 0.65rem;
-    border: 0;
-    background: none;
-    text-align: left;
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-stretch: 85%;
+    letter-spacing: -0.02em;
+    line-height: 1;
     text-decoration: none;
-    cursor: pointer;
-    transition: background-color 120ms ease;
   }
-  .index-num { color: var(--color-oxblood); }
-  .index-label {
-    color: var(--color-ink);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    transition: transform 120ms var(--ease-out);
+  .masthead ul { display: flex; flex-wrap: wrap; gap: 0 clamp(1.1rem, 2.2vw, 2.1rem); margin: 0; padding: 0; list-style: none; }
+  .masthead nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.15rem;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    text-decoration: none;
+    /* The underline draws in for hover (thin) and the current chapter (thick). */
+    background: linear-gradient(var(--accent), var(--accent)) left calc(50% + 0.85em) / 0 2px no-repeat;
+    transition: background-size 260ms var(--ease-out), color 200ms ease;
   }
-  .index-item:active .index-label { transform: translateY(1px); }
-  .index-item[aria-expanded="true"] { background: var(--color-paper); }
-  .index-item:focus-visible { outline-offset: -3px; }
+  .masthead nav a:active { color: var(--accent); }
   @media (hover: hover) and (pointer: fine) {
-    .index-item:hover { background: var(--color-paper); }
+    .masthead nav a:hover { background-size: 100% 1px; }
   }
+  .poster:has(#story:target) .masthead a[href="#story"],
+  .poster:has(#year:target) .masthead a[href="#year"],
+  .poster:has(#month:target) .masthead a[href="#month"],
+  .poster:has(#support:target) .masthead a[href="#support"],
+  .poster:has(#prayer:target) .masthead a[href="#prayer"] { color: var(--accent); background-size: 100% 2px; }
 
-  /* The marker: one oxblood bar under the active cell. It slides between cells
-     and sits on the sheet's top edge, so tab and sheet read as one object. */
-  .index-marker {
-    position: absolute;
-    z-index: 3;
-    left: 0;
-    top: calc(var(--my) - 2px);
-    width: var(--mw);
-    height: 4px;
-    background: var(--color-oxblood);
-    transform: translateX(var(--mx)) scaleY(0);
-    transform-origin: bottom;
-    transition: transform 240ms var(--ease-in-out), width 240ms var(--ease-in-out), top 240ms var(--ease-in-out);
-    pointer-events: none;
+  /* ---------- Stage: the scenes share one cell; the actions sit under them ---------- */
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: clamp(1.4rem, 3.5vh, 2.25rem);
+    padding: clamp(1.25rem, 4vh, 3rem) var(--safe-right) max(clamp(1.75rem, 6vh, 4rem), env(safe-area-inset-bottom)) var(--safe-left);
   }
-  .has-open .index-marker { transform: translateX(var(--mx)) scaleY(1); }
-  .marker-jump .index-marker { transition: none; }
+  .scene {
+    grid-area: 1 / 1;
+    /* Off-stage scenes collapse to no height (so they never stretch the page),
+       fade out quickly, then hide from focus and assistive tech. They stay
+       unpositioned, so photo panels always measure against the whole poster. */
+    height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 6rem);
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 130ms ease, visibility 0s linear 130ms;
+    /* A chapter link always lands at the top of the page, header in view. */
+    scroll-margin-top: 100svh;
+  }
+  .text { max-width: 44rem; }
+  .scene:target,
+  .stage:not(:has(.scene:target)) > .scene-home {
+    height: auto;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 160ms ease 90ms, visibility 0s;
+  }
+  .actions { position: relative; z-index: 1; grid-area: 2 / 1; }
 
-  /* ---------- Poster copy ---------- */
-  .poster-copy {
-    align-self: center;
-    width: min(100%, 44rem);
-    padding: clamp(1.25rem, 3.5vh, 2.75rem) var(--safe-right) max(clamp(1.75rem, 6vh, 4rem), env(safe-area-inset-bottom)) var(--safe-left);
+  /* Type replacing type: each line of the incoming scene settles in turn. */
+  .text > *, .route > li, .lines > *, .requests > * {
+    opacity: 0;
+    transform: translateY(0.7rem);
+    transition: opacity 120ms ease, transform 120ms var(--ease-out);
   }
+  :is(.scene:target, .stage:not(:has(.scene:target)) > .scene-home) :is(.text > *, .route > li, .lines > *, .requests > *) {
+    opacity: 1;
+    transform: none;
+    transition: opacity 300ms ease var(--d, 100ms), transform 520ms var(--ease-out) var(--d, 100ms);
+  }
+  .text > :nth-child(2) { --d: 150ms; }
+  .text > :nth-child(3) { --d: 190ms; }
+  .text > :nth-child(4) { --d: 240ms; }
+  .text > :nth-child(5) { --d: 280ms; }
+  .text > :nth-child(6) { --d: 320ms; }
+  :is(.route, .lines, .requests) > :nth-child(1) { --d: 270ms; }
+  :is(.route, .lines, .requests) > :nth-child(2) { --d: 320ms; }
+  :is(.route, .lines, .requests) > :nth-child(3) { --d: 370ms; }
+  :is(.route, .lines, .requests) > :nth-child(4) { --d: 420ms; }
+  .plate { --d: 140ms; }
+  /* ---------- Home ---------- */
   .name { margin: 0; color: var(--color-oxblood-deep); letter-spacing: 0.14em; }
-
   h1 {
     display: flex;
     flex-direction: column;
@@ -345,12 +542,220 @@ const sheets = [
     letter-spacing: -0.01em;
     text-transform: uppercase;
   }
+  .lede { max-width: min(26rem, 34vw); margin: 0; font-size: 1.1em; line-height: 1.45; }
 
-  .lede { max-width: min(26rem, 34vw); margin: 0 0 1.6rem; font-size: 1.1em; line-height: 1.45; }
+  /* ---------- Chapters: shared parts ---------- */
+  .kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 0 1.25rem; }
+  .kicker h2 { margin: 0; color: var(--accent); letter-spacing: 0.16em; }
+  .next {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    margin-left: auto;
+    text-decoration: none;
+    transition: color 140ms ease, transform 120ms var(--ease-out);
+  }
+  .next :global(.icon) { transition: transform 180ms var(--ease-out); }
+  .next:active { transform: scale(0.96); }
+  @media (hover: hover) and (pointer: fine) {
+    .next:hover { color: var(--accent); }
+    .next:hover :global(.icon-arrow-right) { transform: translateX(0.2rem); }
+    .next:hover :global(.icon-arrow-left) { transform: translateX(-0.2rem); }
+  }
+  .display {
+    margin: 0.3em 0 0.25em;
+    font-weight: 800;
+    font-stretch: 68%;
+    line-height: 0.86;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  .lines p {
+    max-width: 36rem;
+    margin: 0;
+    padding: 0.7rem 0;
+    border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    font-size: clamp(1.05rem, 0.85rem + 0.35vw, 1.25rem);
+    line-height: 1.42;
+  }
+  /* Photographs: each photo chapter frames its own (see the chapter blocks). */
+  .plate { margin: 0; }
+  .plate :global(picture) { display: block; width: 100%; height: 100%; }
+  .plate :global(img) { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* Crops that keep every face in frame. */
+  .plate-gathering :global(img) { object-position: 50% 35%; }
+  .plate-church :global(img) { object-position: 50% 30%; }
+  .plate-english :global(img) { object-position: 50% 42%; }
+  .plate-cafe :global(img) { object-position: 48% 30%; }
+  /* The image settles inside its frame as the chapter arrives. */
+  .plate :global(img) { transform: scale(1.06); transition: transform 120ms var(--ease-out); }
+  .scene:target .plate :global(img) { transform: none; transition: transform 900ms var(--ease-out) var(--d); }
 
+  /* Photo switch (The year): one photograph at a time, crossfading in place.
+     Native radios: arrow keys, visible focus, works without script. */
+  .switch { display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.25rem; margin: 1rem 0 0; padding: 0; border: 0; }
+  .switch label { position: relative; display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: 0.5rem; font-weight: 600; cursor: pointer; }
+  .switch label:first-of-type { margin-left: -0.5rem; }
+  .switch input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+  .switch label span { background: linear-gradient(var(--accent), var(--accent)) left calc(100% + 0.3rem) / 0 2px no-repeat; transition: background-size 220ms var(--ease-out), color 160ms ease; }
+  .switch label:has(:checked) span { color: var(--accent); background-size: 100% 2px; }
+  .switch label:has(:focus-visible) { outline: 3px solid var(--accent); outline-offset: -2px; }
+  .plates { position: relative; }
+  .plates > .plate { position: absolute; inset: 0; transition: opacity 420ms ease, visibility 0s; }
+  .scene-year:has(input[value="english"]:checked) .plate-church,
+  .scene-year:has(input[value="church"]:checked) .plate-english { opacity: 0; visibility: hidden; transition: opacity 420ms ease, visibility 0s linear 420ms; }
+
+  /* ---------- 01 Story: four stops on one line ---------- */
+  .scene-story .display { font-size: clamp(3.2rem, 5.6vw, 6.5rem); }
+  .route {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin: 1.25rem 0 0;
+    padding: 1.4rem 0 0;
+    list-style: none;
+  }
+  /* The path: one ink line with a stop marker per turning point. */
+  .route::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--line, currentColor);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 160ms ease;
+  }
+  .scene:target .route::before { transform: none; transition: transform 900ms var(--ease-out) 180ms; }
+  .route li { position: relative; }
+  .route li::before {
+    content: "";
+    position: absolute;
+    top: calc(-1.4rem - 5px);
+    left: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--s0);
+    box-shadow: inset 0 0 0 2px var(--line, currentColor);
+  }
+  .route li:last-child::before { background: var(--accent); box-shadow: none; }
+  .stop {
+    display: block;
+    font-size: clamp(1.35rem, 0.7rem + 1vw, 2rem);
+    font-weight: 800;
+    font-stretch: 70%;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .route li:last-child .stop { color: var(--accent); }
+  .route p { margin: 0.45rem 0 0; font-size: 0.975rem; line-height: 1.4; }
+
+  /* ---------- 02 The year: the date, then four verbs ---------- */
+  .scene-year .display { margin-bottom: 0.1em; font-size: clamp(4.5rem, 9vw, 10rem); line-height: 0.8; letter-spacing: -0.015em; }
+  .verbs { display: flex; flex-wrap: wrap; gap: 0.1em 0.55em; margin: 0 0 1rem; font-size: clamp(1.5rem, 0.6rem + 1.6vw, 2.5rem); font-weight: 800; font-stretch: 70%; line-height: 1; text-transform: uppercase; }
+  .verbs span + span::before { content: "/"; margin-right: 0.55em; color: var(--accent); font-weight: 400; }
+  .scene-year .display { color: var(--lamp); }
+
+  /* ---------- 03 First month: the friends photograph, generous, dissolving into oat ---------- */
+  .scene-month .display { font-size: clamp(3.2rem, 5.6vw, 6.5rem); }
+  .scene-month .lines p { font-size: clamp(1rem, 0.85rem + 0.3vw, 1.15rem); padding: 0.55rem 0; }
+  /* The image arrives as a single field, like Story and Support, without a frame. */
+  .plate-cafe { clip-path: inset(0 0 100% 0); transition: clip-path 160ms ease; }
+  .scene:target .plate-cafe { clip-path: inset(0); transition: clip-path 720ms var(--ease-out) 80ms; }
+  /* The longer details open in place, under the four lines. */
+  .more { margin-top: 0.4rem; border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+  .more summary { display: flex; align-items: center; min-height: 2.75rem; font-weight: 600; cursor: pointer; list-style: none; }
+  .more summary::-webkit-details-marker { display: none; }
+  .more summary::after { content: "+"; margin-left: 0.5rem; color: var(--accent); font-weight: 700; transition: transform 200ms var(--ease-out); }
+  .more[open] summary::after { transform: rotate(45deg); }
+  .more summary:hover { color: var(--accent); }
+  .more p { max-width: 36rem; margin: 0 0 0.75rem; font-size: 0.975rem; line-height: 1.45; }
+
+  /* ---------- Contact: quiet, under the support action, Support chapter only ---------- */
+  .contact { display: none; grid-area: 3 / 1; }
+  .stage:has(#support:target) .contact { display: block; }
+  .contact h2 { margin: 0 0 0.25rem; letter-spacing: 0.14em; opacity: 0.8; }
+  .contact ul { display: flex; flex-wrap: wrap; gap: 0 1.5rem; margin: 0; padding: 0; list-style: none; }
+  .contact a { display: inline-flex; align-items: baseline; gap: 0.5rem; min-height: 2.75rem; padding-block: 0.6rem; text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); }
+  .contact a:hover { text-decoration-color: currentColor; }
+  /* inline-block keeps the link underline off the small tag. */
+  .contact-kind { display: inline-block; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }
+
+  /* Story's photograph drifts in from the right; The year's rises out of the night. */
+  .plate-gathering { opacity: 0; transform: translateX(4%); transition: opacity 160ms ease, transform 160ms ease; }
+  .scene:target .plate-gathering { opacity: 1; transform: none; transition: opacity 700ms ease 80ms, transform 900ms var(--ease-out) 80ms; }
+  .plate-gathering :global(img) { filter: sepia(0.14) saturate(0.92); }
+  .plates-year { opacity: 0; transition: opacity 160ms ease; }
+  .scene:target .plates-year { opacity: 1; transition: opacity 900ms ease 60ms; }
+  /* Words sit above the photographs where they meet. */
+  .scene .text { position: relative; z-index: 1; }
+
+  /* ---------- 04 Support: two words, then plain facts ---------- */
+  .scene-support .display { display: flex; flex-direction: column; font-size: clamp(4rem, 8.5vw, 9.5rem); line-height: 0.8; }
+  .scene-support .text { max-width: 40rem; }
+
+  /* ---------- 05 Prayer: the three requests are the headline ---------- */
+  .scene-prayer .text { max-width: 40rem; }
+  .intro { margin: 1.1rem 0 0.5rem; font-size: clamp(1.05rem, 0.85rem + 0.4vw, 1.3rem); }
+  .requests { margin: 0; padding: 0; list-style: none; }
+  .requests li {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    align-items: baseline;
+    padding: 0.6rem 0 0.7rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    font-size: clamp(1.7rem, 0.4rem + 2.2vw, 2.9rem);
+    font-weight: 800;
+    font-stretch: 70%;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+  .requests .mono { color: var(--accent); }
+
+  /* ---------- Wide screens: each photo chapter composes its photograph differently ---------- */
+  @media (min-width: 47.5em) and (orientation: landscape) {
+    /* Story: the gathering fills the right of the poster and dissolves into the paper;
+       the route's line runs on across the whole poster, over the photograph. */
+    .scene > .plate-gathering {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 58vw;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, rgb(0 0 0 / 0.25) 12%, #000 34%);
+      mask-image: linear-gradient(to right, transparent 0, rgb(0 0 0 / 0.25) 12%, #000 34%);
+    }
+    .scene-story .text { max-width: min(40rem, calc(42vw + 4rem - var(--safe-left))); }
+    /* The year: All Souls at night melts into the night ground behind the lamp-lit date. */
+    .scene > .plates-year { position: absolute; top: 0; right: 0; bottom: 0; width: 56vw; }
+    .plates-year .plate :global(picture) {
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 42%), linear-gradient(to top, transparent 0, #000 26%);
+      -webkit-mask-composite: source-in;
+      mask-image: linear-gradient(to right, transparent 0, #000 42%), linear-gradient(to top, transparent 0, #000 26%);
+      mask-composite: intersect;
+    }
+    .scene-year .text { max-width: min(40rem, calc(44vw - var(--safe-left))); }
+    /* First month: a full-height photograph; the soft edge gives the words room. */
+    .scene > .plate-cafe {
+      position: absolute;
+      inset: 0 0 0 auto;
+      width: 64vw;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%);
+      mask-image: linear-gradient(to right, transparent 0, #000 38%);
+    }
+    .scene-month .text { max-width: min(32rem, calc(44vw - var(--safe-left) - 2rem)); }
+    .poster:has(#month:target) .actions { max-width: calc(44vw - var(--safe-left) - 1rem); }
+  }
+
+  /* ---------- Actions: in every state ---------- */
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; }
 
-  /* Donate: the one solid, warm object. Hover deepens and lifts the arrow;
+  /* Donate: the one solid, warm object. Hover deepens it and lifts the arrow;
      press sinks the whole button. */
   .donate {
     display: inline-flex;
@@ -359,30 +764,32 @@ const sheets = [
     max-width: 100%;
     min-height: 3.1rem;
     padding: 0.75rem 1.2rem;
-    background: var(--color-oxblood);
-    color: var(--color-paper);
+    background: var(--btn, var(--color-oxblood));
+    color: var(--btn-ink, var(--color-paper));
     font-weight: 700;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     text-decoration: none;
     box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.16);
-    transition: background-color 140ms ease, box-shadow 140ms ease, transform 120ms var(--ease-out);
+    transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 120ms var(--ease-out);
   }
+  /* Each chapter sets --btn / --btn-ink (Support: paper on oxblood). */
+  .donate-text { display: flex; flex-direction: column; min-width: 0; }
   /* At extreme zoom a long word may break rather than be clipped. */
-  .donate span { min-width: 0; overflow-wrap: anywhere; }
-  .donate .icon { transition: transform 180ms var(--ease-out); }
+  .donate-label { overflow-wrap: anywhere; font-size: 1.05rem; letter-spacing: 0.01em; text-transform: none; line-height: 1.2; }
+  .donate-via { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.02em; text-transform: none; opacity: 0.82; }
+  .donate :global(.icon) { transition: transform 180ms var(--ease-out); }
   .donate:active { transform: scale(0.97); box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.16); }
 
-  /* Instagram: a quiet link. Hover draws a heavier oxblood underline and tilts
-     the mark; press nudges it down. */
+  /* Instagram: a quiet link. Hover thickens the underline and tilts the mark;
+     press nudges it down. */
   .social {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.4rem;
     min-height: 2.75rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    font-size: 0.9375rem;
+    font-weight: 500;
     text-decoration: none;
     transition: transform 120ms var(--ease-out);
   }
@@ -391,176 +798,126 @@ const sheets = [
     background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat;
     transition: background-size 180ms var(--ease-out), color 140ms ease;
   }
-  .social .icon { transition: transform 180ms var(--ease-out), color 140ms ease; }
+  .social :global(.icon) { transition: transform 180ms var(--ease-out), color 140ms ease; }
   .social:active { transform: translateY(1px); }
 
   @media (hover: hover) and (pointer: fine) {
-    .donate:hover { background: var(--color-oxblood-deep); box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.28); }
-    .donate:hover .icon { transform: translate(0.18rem, -0.18rem); }
-    .social:hover span { color: var(--color-oxblood-deep); background-size: 100% 3px; }
-    .social:hover .icon { color: var(--color-oxblood-deep); transform: rotate(-8deg) scale(1.08); }
+    .donate:hover { background: color-mix(in srgb, var(--btn, var(--color-oxblood)) 82%, var(--btn-hover, #000)); box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.28); }
+    .donate:hover :global(.icon) { transform: translate(0.18rem, -0.18rem); }
+    .social:hover span { color: var(--accent); background-size: 100% 3px; }
+    .social:hover :global(.icon) { color: var(--accent); transform: rotate(-8deg) scale(1.08); }
   }
 
-  /* While a sheet is open, the copy it covers steps back; the actions stay. */
-  .poster-copy > :not(.actions) { transition: opacity 200ms ease; }
-  .poster-top.has-open ~ .poster-copy > :not(.actions) { opacity: 0.14; }
-
-  /* ---------- Sheets ---------- */
-  .sheet-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0 0.75rem;
-    padding-bottom: 0.65rem;
-    border-bottom: 1px solid var(--color-ink);
-  }
-  .sheet-num { margin: 0; color: var(--color-oxblood); }
-  .sheet-head h2 { flex: 1; margin: 0; font-size: 0.8125rem; letter-spacing: 0.14em; }
-  .sheet-close {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    min-height: 2.75rem;
-    padding: 0 0.25rem 0 0.75rem;
-    border: 0;
-    background: none;
-    cursor: pointer;
-    transition: color 120ms ease, transform 120ms var(--ease-out);
-  }
-  .sheet-close[hidden] { display: none; }
-  .sheet-close:active { transform: scale(0.95); }
-  @media (hover: hover) and (pointer: fine) { .sheet-close:hover { color: var(--color-oxblood); } }
-
-  .sheet-body { padding-top: 1rem; }
-  .sheet-body p { margin: 0 0 0.85rem; max-width: 34rem; }
-  .sheet-body p:last-child { margin-bottom: 0; }
-  .prayer-list { margin: 0; padding: 0; list-style: none; font-size: 1.15em; font-weight: 600; }
-  .prayer-list li { display: flex; gap: 0.9rem; align-items: baseline; padding: 0.55rem 0; border-top: 1px solid rgb(23 33 42 / 0.2); }
-  .prayer-list .mono { color: var(--color-oxblood); }
-
-  /* Without JavaScript: the sheets are a plain section under the poster. */
-  .sheets {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    gap: 2.5rem var(--gutter);
-    padding: 3rem var(--gutter) max(3rem, env(safe-area-inset-bottom));
-    background: var(--color-paper);
-  }
-  .sheet { scroll-margin-top: 1rem; }
-
-  /* With JavaScript: one sheet at a time, hanging from the index. */
-  :global(.js) .sheets {
-    position: absolute;
-    top: 100%;
-    left: var(--safe-left);
-    right: var(--safe-right);
-    display: block;
-    padding: 0;
-    background: none;
-  }
-  :global(.js) .sheet {
-    display: none;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 1.1rem 1.25rem 1.4rem;
-    background: var(--color-paper);
-    box-shadow: 0 22px 50px -26px rgb(23 33 42 / 0.6);
-    /* Unfolds downward from the index; closing folds it back up. */
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path 180ms var(--ease-out);
-  }
-  :global(.js) .sheet.is-shown { display: block; }
-  :global(.js) .sheet.is-open { clip-path: inset(0 0 0 0); transition-duration: 260ms; }
-
-  /* Title, then body, follow the unfold by a beat. */
-  :global(.js) .sheet > * {
-    opacity: 0;
-    transform: translateY(-0.35rem);
-    transition: opacity 100ms ease, transform 100ms var(--ease-out);
-  }
-  :global(.js) .sheet.is-open > * { opacity: 1; transform: none; transition-duration: 220ms; }
-  :global(.js) .sheet.is-open > .sheet-head { transition-delay: 70ms; }
-  :global(.js) .sheet.is-open > .sheet-body { transition-delay: 120ms; }
-  /* Switching between sheets: no unfold, just a quick settle of the text. */
-  :global(.js) .sheet.is-quick { clip-path: inset(0); transition: none; }
-  :global(.js) .sheet.is-quick.is-open > .sheet-head { transition-delay: 0ms; }
-  :global(.js) .sheet.is-quick.is-open > .sheet-body { transition-delay: 40ms; }
-  .sheet:focus-visible { outline-offset: 0; }
-
-  /* ---------- Arrival, once: sky colour → photo rises in → headline → index ---------- */
+  /* ---------- Arrival, once: sky colour → photo rises in → headline → header ---------- */
+  /* `backwards` fill only: once finished, the arrival never fights the state transitions. */
   @media (prefers-reduced-motion: no-preference) {
-    .poster :global(.poster-image) { animation: reveal 950ms var(--ease-in-out) both; }
-    h1 span { animation: rise 700ms var(--ease-out) 420ms both; }
-    h1 span + span { animation-delay: 500ms; }
-    .index ol::before { animation: rule 650ms var(--ease-out) 620ms both; }
-    .index li { animation: rise-small 500ms var(--ease-out) both; }
-    .index li:nth-child(1) { animation-delay: 680ms; }
-    .index li:nth-child(2) { animation-delay: 740ms; }
-    .index li:nth-child(3) { animation-delay: 800ms; }
+    .poster > :global(picture) { animation: reveal 950ms var(--ease-in-out) backwards; }
+    #home h1 span { animation: rise 650ms var(--ease-out) 380ms backwards; }
+    #home h1 span + span { animation-delay: 470ms; }
+    .wordmark, .masthead li { animation: rise-small 480ms var(--ease-out) 600ms backwards; }
+    .masthead li:nth-child(1) { animation-delay: 640ms; }
+    .masthead li:nth-child(2) { animation-delay: 680ms; }
+    .masthead li:nth-child(3) { animation-delay: 720ms; }
+    .masthead li:nth-child(4) { animation-delay: 760ms; }
+    .masthead li:nth-child(5) { animation-delay: 800ms; }
+    #home .name, #home .lede, .actions { animation: arrive 420ms var(--ease-out) 720ms backwards; }
   }
   @keyframes reveal {
     from { clip-path: inset(100% 0 0 0); transform: scale(1.06); }
     to { clip-path: inset(0); transform: none; }
   }
-  /* Small enough to stay inside the gap under the headline: no overlap with the lede. */
-  @keyframes rise { from { transform: translateY(0.1em); } }
-  @keyframes rise-small { from { transform: translateY(0.5rem); } }
-  @keyframes rule { from { transform: scaleX(0); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(0.22em); } }
+  @keyframes rise-small { from { opacity: 0; transform: translateY(0.5rem); } }
+  @keyframes arrive { from { opacity: 0; transform: translateY(0.4rem); } }
 
-  /* ---------- Desktop: the index is a full part of the type grid ---------- */
-  @media (min-width: 47.5em) and (orientation: landscape) {
-    .poster-top { gap: 1.25rem; }
-    .index-item { gap: 0.3rem; padding: 0.85rem 1.1rem 0.9rem; }
-    .index-label {
-      font-family: var(--font-sans);
-      font-size: clamp(1.15rem, 0.7rem + 0.75vw, 1.6rem);
-      font-weight: 700;
-      font-stretch: 75%;
-      letter-spacing: 0.02em;
-      line-height: 1;
-    }
-    .index-num { font-size: 0.8125rem; }
-  }
-
-  /* ---------- Portrait screens: index on top, Bible in the middle, copy below ---------- */
+  /* ---------- Portrait screens: photographs first, then the words ---------- */
   @media (orientation: portrait), (max-width: 47.5em) {
     .poster :global(.poster-image) { object-position: 70% 30%; }
-    .poster::before { display: none; }
-    .poster-top { width: 100%; gap: 0.75rem; }
-    /* The scrim travels with the copy: a short fade, then a near-solid band. */
-    .poster-copy {
-      align-self: end;
-      width: 100%;
-      padding-top: 4rem;
-      background: linear-gradient(to bottom, rgb(var(--color-mist) / 0) 0, rgb(var(--color-mist) / 0.95) 4rem);
+    /* A short wash behind the header, and a band behind the copy that grows
+       with each state's text. */
+    .scrim {
+      background:
+        linear-gradient(to bottom, var(--s1) 0, transparent 6.5rem),
+        linear-gradient(to top, var(--s0) 0, var(--s0) var(--band), transparent calc(var(--band) + 16%));
     }
-    .poster-copy > * { max-width: 32rem; }
+    .masthead { gap: 0 1.1rem; }
+    .masthead ul { flex-wrap: nowrap; gap: 0; margin-left: -0.3rem; }
+    .masthead nav a { padding-inline: 0.3rem; font-size: clamp(0.875rem, 3.9vw, 1rem); white-space: nowrap; }
+    .stage { align-content: end; padding-top: 1.25rem; }
+    .scene { gap: 1.25rem; }
+    .text { max-width: 32rem; }
+    /* Photographs lead each chapter on a phone. */
+    .scene > :is(.plate, .plates) { order: -1; margin-inline: calc(-1 * var(--safe-left)) calc(-1 * var(--safe-right)); }
+    /* Story: the gathering fades down into the paper. */
+    .plate-gathering { height: 48svh; }
+    .plate-gathering :global(picture) { -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent); mask-image: linear-gradient(to bottom, #000 62%, transparent); }
+    /* The year: the night photograph fades into the night ground. */
+    .plates-year { height: 46svh; }
+    .plates-year .plate :global(picture) { -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent); mask-image: linear-gradient(to bottom, #000 60%, transparent); }
+    /* First month: the full-width photograph fades into the oat ground. */
+    .plate-cafe { height: 50svh; }
+    .plate-cafe :global(picture) {
+      -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent);
+      mask-image: linear-gradient(to bottom, #000 68%, transparent);
+    }
+    /* The actions ride along at the bottom of the screen (sticky, in flow): on long
+       chapters the support link stays in reach; at the end of the page the bar rests
+       in its own place and covers nothing. */
+    .stage { padding-bottom: 0; }
+    .actions {
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+      flex-wrap: nowrap;
+      gap: 1rem;
+      margin-inline: calc(-1 * var(--safe-left)) calc(-1 * var(--safe-right));
+      padding: 0.75rem var(--safe-right) max(0.75rem, env(safe-area-inset-bottom)) var(--safe-left);
+      background: var(--s0);
+      box-shadow: 0 -1px 0 color-mix(in srgb, currentColor 14%, transparent);
+    }
+    .donate { flex: 1; justify-content: space-between; }
+    /* Instagram becomes its icon alone; the label stays for assistive tech. */
+    .social span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .social { min-width: 2.75rem; justify-content: center; }
+    .social :global(.icon) { width: 1.5rem; height: 1.5rem; }
+    /* The route's line draws downward. */
+    .route::before { transform: scaleY(0); transform-origin: top; }
     h1 { font-size: clamp(4rem, 24vw, 9rem); margin-bottom: 1rem; }
-    .lede { max-width: 30rem; margin-bottom: 1.25rem; font-size: 1em; }
+    .lede { max-width: 30rem; font-size: 1em; }
+    .scene-story .display, .scene-month .display { font-size: clamp(2.6rem, 12vw, 4.5rem); }
+    .scene-year .display { font-size: clamp(4rem, 22vw, 8rem); }
+    .verbs { font-size: clamp(1.15rem, 5.4vw, 1.6rem); }
+    .scene-support .display { font-size: clamp(3.6rem, 19vw, 7rem); }
+    .requests li { font-size: clamp(1.45rem, 7vw, 2.4rem); }
+    .lines p { padding: 0.55rem 0; font-size: 1rem; }
+    /* The route turns vertical: the line runs down the left. */
+    .route { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; padding: 0 0 0 1.5rem; }
+    .route::before { top: 0.4rem; bottom: 0.4rem; left: 5px; right: auto; width: 2px; height: auto; }
+    .route li::before { top: 0.2rem; left: calc(-1.5rem); }
+    .route p { margin-top: 0.2rem; }
   }
 
   /* ---------- Preferences ---------- */
   @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
-    .poster::before { display: none; }
-    .poster-top.has-open ~ .poster-copy > :not(.actions) { opacity: 0; }
-    .poster-copy { margin: 1rem; padding: 1.5rem; background: var(--color-paper); border: 1px solid var(--color-ink); }
-    .index ol { background: var(--color-paper); }
-    :global(.js) .sheet { border: 1px solid var(--color-ink); box-shadow: none; }
+    .poster { --s0: var(--solid) !important; --s1: var(--solid) !important; }
   }
   @media (forced-colors: active) {
-    .poster-copy, .index ol, :global(.js) .sheet { background: Canvas; border: 1px solid CanvasText; }
+    .scrim { display: none; }
     .donate { border: 2px solid ButtonText; }
-    .index-marker { background: Highlight; }
-    .index-item[aria-expanded="true"] { outline: 2px solid Highlight; }
+    .route::before, .gate-line { background: CanvasText; }
     /* Forced colours draw a backplate per line; tight leading would let it cover the next line. */
-    h1 { line-height: 1; }
+    h1, .display, .requests li, .gate-word { line-height: 1; }
   }
   @media (prefers-reduced-motion: reduce) {
-    /* Keep colour and opacity feedback; drop movement and the unfold. */
-    .index-marker { transition: none; }
-    :global(.js) .sheet, :global(.js) .sheet.is-open { clip-path: none; transition: none; }
-    :global(.js) .sheet > *, :global(.js) .sheet.is-open > * { transform: none; transition-property: opacity; transition-delay: 0ms; }
-    .donate, .donate:active, .social:active, .sheet-close:active,
-    .index-item:active .index-label, .donate:hover .icon, .social:hover .icon { transform: none; }
+    /* Immediate recomposition: keep short opacity changes, drop all movement. */
+    .poster { transition: none; }
+    .poster :global(.poster-image), .plate :global(img) { transition: none; transform: none; }
+    .text > *, .route > li, .lines > *, .requests > * { transition-property: opacity !important; transform: none !important; }
+    .plate-gathering, .plates-year, .plates > .plate, .plate-cafe, .route::before { transition: none !important; }
+    .plate-cafe { clip-path: none !important; }
+    .plate-gathering, .route::before { transform: none !important; }
+    .masthead nav a, .donate, .social span { transition: none; }
+    .donate, .donate:active, .social:active, .next:active,
+    .donate:hover :global(.icon), .social:hover :global(.icon), .next:hover :global(.icon) { transform: none; }
   }
 </style>

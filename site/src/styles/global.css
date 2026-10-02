@@ -41,11 +41,11 @@ p { text-wrap: pretty; }
 
 a { color: inherit; touch-action: manipulation; text-underline-offset: 0.25em; text-decoration-thickness: 1px; }
 button { font: inherit; color: inherit; touch-action: manipulation; }
-:focus-visible { outline: 3px solid var(--color-oxblood); outline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--accent, var(--color-oxblood)); outline-offset: 3px; }
 
 .icon { flex: none; width: 1.15em; height: 1.15em; }
 
-/* Index-card label: monospaced, upper case, never tiny. */
+/* Small label: monospaced, upper case, never tiny. */
 .mono {
   font-family: var(--font-mono);
   font-size: 0.8125rem;

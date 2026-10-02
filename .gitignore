@@ -17,3 +17,5 @@ dist/
 .playwright-mcp/
 /.backups/
 .docs
+.claude
+docs

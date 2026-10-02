@@ -16,7 +16,15 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : nu
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <script is:inline>document.documentElement.classList.add("js")</script>
+    {/* .entry shows the LINWAY intro: first visit this session, no deep link, motion allowed. */}
+    <script is:inline>
+      (function (d) {
+        d.classList.add("js");
+        try {
+          if (!location.hash && !sessionStorage.getItem("linway-entered") && !matchMedia("(prefers-reduced-motion: reduce)").matches) d.classList.add("entry");
+        } catch (e) {}
+      })(document.documentElement);
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#dceaf3" />

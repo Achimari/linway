@@ -30,10 +30,14 @@ The tone in the source is earnest, calm, relational, and direct. It becomes less
 | Her application preference was Cross-cultural Ministry / Free English. | MTS application, ministry-focus answer | Strong as a preference. Do not call it her confirmed role until Lina confirms placement. |
 | Training includes biblical/theological input, practical ministry, supervision, mentoring, study, and team participation. | Training agreement | Strong description of the programme generally. Use only if Lina confirms she is participating. |
 | Support letters and prayer partners are expected as part of the year. | Training agreement | Strong. It does not authorize publishing private financial or contact details. |
+| She has completed her first month of MTS: a new city, church and team; Free English has held four days of sessions (a women-only morning group, evening sessions open to everyone); the trainees are studying 1 Corinthians, discipleship and leading small groups, with a regular Preachers’ Breakfast; she attended a Formation Conference in Nottingham; English has been her biggest challenge. | `My First Month of MT.docx` (added 2 October 2026), Lina’s own first-month update | Her first-person account of current participation, newer than the application and agreement. It supersedes “hope to serve with Free English” for the private preview. Still Lina’s self-report, not organisational confirmation; she must approve the public wording. A reading-file reference in the document names a third party and is excluded. |
+| Lina’s public contacts: WhatsApp +44 77 7847 4925, email linamak1111@gmail.com. | Supplied by the site owner on 2 October 2026 for public use | The only contact details allowed on the site. Every other phone number, email, and third-party contact remains excluded. |
 
 ## Claims that need confirmation
 
-The supplied website draft says, “I am spending the year in London” and describes Free English as an active placement. The dated programme material supports acceptance and planned dates, but there is no independent confirmation of arrival, participation, or assignment. Until Lina confirms, use “I was accepted for the 2026–27 programme” and “I hope to focus on cross-cultural ministry through Free English,” or omit the current chapter from the public preview.
+The supplied website draft says, “I am spending the year in London” and describes Free English as an active placement. The dated programme material supports acceptance and planned dates, but there is no independent confirmation of arrival, participation, or assignment.
+
+**Update, 2 October 2026:** Lina’s own first-month update (`My First Month of MT.docx`) describes the scheme and Free English sessions as under way. The private preview now reflects that account in her voice (see `docs/COPY-LEDGER.md`). It is still self-reported and her final approval of the wording is pending (`copyReviewedByLina`, `currentStatusConfirmed` stay false).
 
 The education material says she was approaching the end of university studies. It does not establish completion or a degree award. The experience page should say “Business and Management studies, Transport and Telecommunication Institute, Riga” without a graduation date until confirmed.
 
@@ -47,8 +51,8 @@ The draft asks visitors to leave an email address, but no mailing provider, cons
 
 Never publish or pass into page data:
 
-- home addresses, private phone numbers, birth date, signatures, passport/visa/sponsorship identifiers, or application reference data;
-- private email addresses or contact details for referees, employers, pastors, staff, family, or third parties;
+- home addresses, any phone number other than Lina’s supplied WhatsApp number, birth date, signatures, passport/visa/sponsorship identifiers, or application reference data;
+- any email address other than Lina’s supplied one, or contact details for referees, employers, pastors, staff, family, or third parties;
 - medical or disability answers;
 - immigration status inferred from sponsorship paperwork;
 - financial commitments, savings, or private support arrangements;
@@ -69,7 +73,7 @@ A real portrait, if Lina wants one, would make the introduction more personal. A
 - exact public programme/placement wording approved by Lina and, if required, the organisation;
 - education outcome and desired CV dates;
 - public role dates and job titles;
-- preferred contact route and social links;
+- ~~preferred contact route and social links~~ (supplied 2 October 2026: WhatsApp, email, Instagram);
 - final public wording around the supplied Stewardship link and approved prayer requests;
 - the first dated update written or approved by Lina;
 - image captions, credits, and rights;
