@@ -58,13 +58,15 @@ test('single-page site: routes, actions, scenes and audit', { timeout: 180_000 }
     assert.ok(scene[1].replace(/<[^>]+>/g, '').trim().length > 60, `#${id} has readable text`);
   }
 
-  // Gallery: four photographs (the first-month chapter uses only the café photo), each described by its alt text (no visible captions), fetched at low priority.
+  // Gallery: four photographs (the first-month chapter uses only the café photo), each described by its alt text (no visible captions), lazy and at low priority.
   const figures = [...home.matchAll(/<figure[^>]*>([\s\S]*?)<\/figure>/g)].map((m) => m[1]);
   assert.equal(figures.length, 4);
   assert.doesNotMatch(home, /\/_astro\/sport\.|life-photo|id="life"/);
   for (const f of figures) {
     assert.match(f, /<img[^>]*alt="[^"]{30,}"/);
     assert.match(f, /<img[^>]*fetchpriority="low"/);
+    // Lazy: only the hero loads with Home; the script warms chapter photos later.
+    assert.match(f, /<img[^>]*loading="lazy"/);
   }
   assert.doesNotMatch(home, /<figcaption/);
   // The year shows one photograph at a time, switched by native radios (works without script).
@@ -102,7 +104,7 @@ test('single-page site: routes, actions, scenes and audit', { timeout: 180_000 }
   const text = home.replace(/<[^>]+>/g, ' ');
   assert.doesNotMatch(text, /self-funded|I am spending the year|Leave your email/i);
   // Free English sessions have started (Lina's first-month update); the old hope wording is gone.
-  assert.match(text, /I’m learning how to serve there alongside the team/);
+  assert.match(text, /One of the main places I serve is Free English/);
   assert.doesNotMatch(text, /I hope to serve with Free English|This year I’m in London/);
   // The first month's longer details open in place (native disclosure).
   assert.match(home, /<details class="more"[^>]*>\s*<summary[^>]*>More from the month<\/summary>/);

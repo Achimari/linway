@@ -68,7 +68,7 @@ The earlier multi-page version (story, experience, support, journal with publica
 | --- | --- | --- | --- | --- |
 | Home | sky and mist | What next? | — | Bible (background) |
 | 01 Story | warm paper `#f3eadb`, chair green `#1f3a2c`, rust `#93441f` | Faith became my own. | the route line draws under the four turning points (its only rule) | gathering, dissolving into the paper |
-| 02 The year | night blue `#0e1233`, lamp amber `#f2c27b`, violet `#9aa3ff` | 2026–27 (in lamp amber) | Learn / Serve / Grow / Discern | All Souls at night melting into the ground; Free English via the switch |
+| 02 The year | night blue `#0e1233`, lamp amber `#f2c27b`, violet `#9aa3ff` | 2026–27 (in lamp amber) | three plain lines | All Souls at night melting into the ground; Free English via the switch |
 | First month | café oat `#e7e0c9`, espresso ink `#2c2219`, oxblood accent `#8b2e3d` | One month in. | four short lines; “More from the month” opens in place (`<details>`) | café (friends), full height, dissolving into the oat ground |
 | 04 Support | oxblood over the Bible | Voluntary. Unpaid. | inverted Stewardship button | Bible (background) |
 | 05 Prayer | mist over the Bible | — | the numbered requests at headline scale | Bible (background) |
@@ -76,6 +76,10 @@ The earlier multi-page version (story, experience, support, journal with publica
 Story, The year and First month each treat the photograph as part of the scene: Story's fills the right of the poster and dissolves into the paper behind the text (a CSS mask), The year's fades into the night ground on two edges, and First month's full-height friends photo dissolves into its oat ground. Photographs carry no visible captions; their alt text describes them. The year shows one photograph at a time; a switch of native radio buttons under the text (legend “Photo”, for assistive tech only) crossfades to the second (arrow keys, works without script). Each chapter also recolours the Stewardship button (`--btn`, `--btn-ink`). On phones the photograph leads each chapter and fades into the ground; the route turns vertical. Off-stage scenes collapse to zero height rather than being positioned, so a panel always measures against the whole poster. Off-stage scenes leave the layout, so the page is only as tall as the current chapter; at short heights, 200% zoom and on phones for photo chapters, the page scrolls normally.
 
 Motion: on a change the Bible photo re-crops (650 ms), the ground colour and accent cross-fade, the old scene fades in 130 ms, then the new rule draws, lines settle in turn and photographs settle inside their frames. All CSS transitions, so they retarget on rapid input. Under `prefers-reduced-motion` there is no intro and recomposition is immediate.
+
+Performance: only the scrim, header and action bar animate the state colours; the poster itself has no transitions, because an inherited value animating there restyles every element on every frame (measured as the main cost of a chapter switch on throttled phones). Chapter photos are `loading="lazy"` and an off-stage photo's `<picture>` has `content-visibility: hidden`, so Home loads only the hero; the script fetches and decodes a chapter's photos when its link is touched, hovered or focused, and the rest once the page is idle after the intro (skipped with Save-Data). Deep links and no-JS visits load the open chapter's photo directly.
+
+Phones: the header is the wordmark over one row of all five chapters, sharing the width (each link's tap area fills its share); photographs lead each chapter at about a third of the screen height (less on short screens), and the action bar is a slim, opaque strip that respects safe areas and keeps keyboard focus clear (`scroll-padding-bottom`). A phone on its side keeps the desktop composition with the same strip at the bottom.
 
 The page carries no review markers. What still needs Lina’s approval, and why, is in `docs/COPY-LEDGER.md`.
 
