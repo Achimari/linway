@@ -54,7 +54,7 @@ The earlier multi-page version (story, experience, support, journal with publica
 | The Bible photograph (with rights note) | `src/assets/hero/hero-sky.jpg`, `src/assets/hero/SOURCE.md` |
 | Gallery photographs (with consent notes) | `src/assets/gallery/*.jpg`, `src/assets/gallery/SOURCE.md` |
 | Icons (outward, back and next arrows, Instagram) | `src/components/Icon.astro` |
-| Favicon: a path running to the horizon, on an oxblood disc | `public/favicon.svg`, with `favicon-32.png` (fallback) and `apple-touch-icon.png` (180 px, disc on a full-bleed paper tile) rendered from it with `sharp` |
+| Favicons: the supplied oxblood cross and path set (`linway-favicon-A`, added 3 October 2026) | `public/favicon.ico`, `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, and `site.webmanifest` |
 | Privacy audit | `scripts/audit-dist.ts` |
 | Tests | `tests/site.test.ts` (build, routes, actions, scene contract, audit) |
 

@@ -76,11 +76,20 @@ test('single-page site: routes, actions, scenes and audit', { timeout: 180_000 }
   // No popup machinery is left.
   assert.doesNotMatch(home, /class="sheet|index-marker|data-close/);
 
-  // Icons: SVG, PNG fallback, touch icon.
-  for (const [href, file] of [['/favicon.svg', 'favicon.svg'], ['/favicon-32.png', 'favicon-32.png'], ['/apple-touch-icon.png', 'apple-touch-icon.png']]) {
-    assert.match(home, new RegExp(`href="${href}"`));
+  // The supplied favicon set is linked with a versioned URL so browsers refresh it.
+  for (const [href, file] of [
+    ['/favicon.ico?v=a-20261003', 'favicon.ico'],
+    ['/favicon.svg?v=a-20261003', 'favicon.svg'],
+    ['/favicon-32.png?v=a-20261003', 'favicon-32.png'],
+    ['/apple-touch-icon.png?v=a-20261003', 'apple-touch-icon.png'],
+  ]) {
+    assert.ok(home.includes(`href="${href}"`), `${file} linked`);
     assert.ok(readFileSync(join(out, file)).length > 100, `${file} ships`);
   }
+  assert.match(home, /rel="manifest" href="\/site\.webmanifest"/);
+  const manifest = JSON.parse(read('site.webmanifest'));
+  assert.deepEqual(manifest.icons.map((icon: { src: string }) => icon.src), ['/icon-192.png', '/icon-512.png']);
+  for (const file of ['icon-192.png', 'icon-512.png']) assert.ok(readFileSync(join(out, file)).length > 100, `${file} ships`);
 
   // The enhancement script ships, small and inline; the JS flag is set before paint.
   const scripts = [...home.matchAll(/<script type="module"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
